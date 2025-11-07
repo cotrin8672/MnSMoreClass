@@ -1,0 +1,39 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+runs
+run-data
+run-client
+run-server
+
+repo
+
+# serena memory
+.serena/
+.claude
+.kotlin
+.vscode
+
+# temporary files
+temp_*.py
+%SystemDrive%/
+/.kotlin/sessions/kotlin-compiler-3471636530019372774.salive

@@ -1,0 +1,40 @@
+modLoader="kotlinforforge"
+
+loaderVersion="${loaderVersionRange}"
+license="${modLicense}"
+
+[[mods]]
+modId="${modId}"
+version="${modVersion}"
+displayName="${modName}"
+authors="${modAuthors}"
+logoFile = "logo.png"
+description='''${modDescription}'''
+
+[[dependencies.${modId}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forgeVersionRange}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${modId}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraftVersionRange}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${modId}]]
+    modId="kotlinforforge"
+    mandatory=true
+    versionRange="[4.11,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${modId}]]
+    modId="mmorpg"
+    mandatory=true
+    versionRange="[6.3.7,)"
+    ordering="AFTER"
+    side="BOTH"

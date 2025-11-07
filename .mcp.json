@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mns-repo": {
+      "type": "sse",
+      "url": "https://gitmcp.io/RobertSkalko/Mine-And-Slash-Rework"
+    }
+  }
+}
