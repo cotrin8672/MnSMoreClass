@@ -18,17 +18,80 @@
 
 ## プロジェクトセットアップ
 
-### 依存関係
+### 1. Forgeプロジェクト作成
+
+```bash
+# Forge MDK をダウンロード
+# https://files.minecraftforge.net/
+
+# プロジェクトディレクトリで
+./gradlew genIntellijRuns  # IntelliJ IDEA
+./gradlew genEclipseRuns   # Eclipse
+```
+
+### 2. Kotlinプラグイン追加
 
 `build.gradle`:
 
 ```gradle
-dependencies {
-    implementation fg.deobf("curse.maven:mine-and-slash-<id>:<version>")
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0'  // Kotlinプラグイン
+}
+
+// Kotlinソースセット
+sourceSets {
+    main {
+        kotlin {
+            srcDir 'src/main/kotlin'
+        }
+    }
 }
 ```
 
-### MODエントリーポイント
+### 3. 依存関係追加
+
+`build.gradle`:
+
+```gradle
+repositories {
+    maven {
+        name = "CurseForge"
+        url = "https://www.cursemaven.com"
+    }
+}
+
+dependencies {
+    // Mine and Slash本体
+    implementation fg.deobf("curse.maven:mine-and-slash-636295:5148663")
+
+    // Kotlin for Forge
+    implementation 'thedarkcolour:kotlinforforge:4.3.0'
+}
+```
+
+**注意**: CurseForgeのバージョンIDは[CurseForge Files](https://www.curseforge.com/minecraft/mc-mods/mine-and-slash-reloaded/files)で確認
+
+### 4. mods.toml設定
+
+`src/main/resources/META-INF/mods.toml`:
+
+```toml
+modLoader="kotlinforforge"
+loaderVersion="[4,)"
+
+[[mods]]
+modId="your_mod_id"
+version="1.0.0"
+displayName="Your Mod Name"
+
+[[dependencies.your_mod_id]]
+    modId="mine_and_slash"
+    mandatory=true
+    versionRange="[5.3.0,)"
+```
+
+### 5. MODエントリーポイント
 
 ```kotlin
 @Mod(ModIdentity.MOD_ID)
@@ -136,6 +199,16 @@ fun ValueCalculation.add() {
 
 ## データ生成
 
+### データ生成の流れ
+
+```
+1. コードでオブジェクト構築（SpellBuilder.of(...).build()）
+2. レジストリに登録（.add()）
+3. データ生成タスク実行（./gradlew runData）
+4. JSONファイル生成（src/generated/resources/）
+5. 本番ビルド時にJSONを同梱
+```
+
 ### MnsDataProvider
 
 汎用データプロバイダー：
@@ -169,6 +242,14 @@ class MnsDataProvider<T>(
 fun gatherData(event: GatherDataEvent) {
     val output = event.generator.packOutput
 
+    // 1. レジストリに登録
+    SpellRegistry.register()
+    ExileEffectRegistry.register()
+    ValueCalcRegistry.register()
+    PerkRegistry.register()
+    SpellSchoolRegistry.register()
+
+    // 2. データプロバイダー追加
     // Spells
     event.generator.addProvider(
         event.includeServer(),
@@ -185,6 +266,30 @@ fun gatherData(event: GatherDataEvent) {
         }
     )
 
+    // ValueCalculations
+    event.generator.addProvider(
+        event.includeServer(),
+        MnsDataProvider(output, ValueCalcRegistry.getAll(), "mmorpg_value_calc") { calc ->
+            ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, calc.id)
+        }
+    )
+
+    // Perks
+    event.generator.addProvider(
+        event.includeServer(),
+        MnsDataProvider(output, PerkRegistry.getAll(), "mmorpg_perk") { perk ->
+            ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, perk.id)
+        }
+    )
+
+    // SpellSchools
+    event.generator.addProvider(
+        event.includeServer(),
+        MnsDataProvider(output, SpellSchoolRegistry.getAll(), "mmorpg_spell_school") { school ->
+            ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, school.id)
+        }
+    )
+
     // ValueCalc
     event.generator.addProvider(
         event.includeServer(),
@@ -195,19 +300,93 @@ fun gatherData(event: GatherDataEvent) {
 }
 ```
 
-### 生成コマンド
+### データ生成実行
+
+#### 1. データ生成タスク実行
 
 ```bash
 ./gradlew runData
 ```
 
-生成先:
+#### 2. 生成先確認
+
 ```
 src/generated/resources/data/mmorpg/
-├── mmorpg_spells/
-├── mmorpg_exile_effect/
-└── mmorpg_value_calc/
+├── mmorpg_spells/          # スペルJSON
+├── mmorpg_exile_effect/    # ExileEffectJSON
+├── mmorpg_value_calc/      # ValueCalculationJSON
+├── mmorpg_perk/            # PerkJSON
+└── mmorpg_spell_school/    # SpellSchoolJSON
 ```
+
+#### 3. 本番ビルド時の注意
+
+生成されたJSONファイルは本番ビルド時に自動的に同梱されます：
+
+```gradle
+// build.gradleで設定（通常は自動）
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/generated/resources'
+        }
+    }
+}
+```
+
+#### 4. Git管理
+
+`.gitignore`:
+```
+# 生成リソースは通常コミットしない
+src/generated/
+```
+
+**ただし**: リポジトリによっては生成済みJSONをコミットする場合もある（チーム方針次第）
+
+---
+
+## アイコンファイル
+
+スペルやPerkには専用のアイコンテクスチャが必要です。
+
+### アイコンパス規則
+
+| オブジェクト | パス |
+|-------------|------|
+| Spell | `assets/mmorpg/textures/gui/spells/{spell_id}.png` |
+| Perk (Passive) | `assets/mmorpg/textures/gui/spells/passives/{perk_id}.png` |
+| Perk (AscPoint) | `assets/mmorpg/textures/gui/asc_classes/perk/{perk_id}.png` |
+| GameChanger | `assets/mmorpg/textures/gui/stat_icons/game_changers/{id}.png` |
+| SpellSchool | （アイコン不要） |
+
+### アイコン仕様
+
+- **サイズ**: 32x32 ピクセル
+- **フォーマット**: PNG
+- **透過**: サポート（推奨）
+
+### ファイル配置例
+
+```
+src/main/resources/assets/mmorpg/textures/gui/
+├── spells/
+│   ├── barkskin.png            # Barkskinスペル
+│   ├── purification.png        # Purificationスペル
+│   └── passives/
+│       ├── p_health_druid.png  # 体力パッシブ
+│       └── p_mana_regen_druid.png  # マナリジェネパッシブ
+└── asc_classes/
+    └── perk/
+        └── asc_point_0.png     # アセンションポイント
+```
+
+### アイコンがない場合
+
+- スペル: デフォルトのプレースホルダーアイコンが表示される
+- Perk: エラーログが出力され、見た目が壊れる可能性
+
+**推奨**: 実装前にアイコンを準備するか、一時的にMine and Slash本体のアイコンをコピー
 
 ---
 
