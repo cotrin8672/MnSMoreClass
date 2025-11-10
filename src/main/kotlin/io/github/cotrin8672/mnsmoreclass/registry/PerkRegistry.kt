@@ -19,7 +19,7 @@ object PerkRegistry : IMnsRegistry<Perk> by MnsRegistryDelegate() {
                 max_lvls = spell.max_lvl
                 stats = listOf(OptScaleExactStat(1F, LearnSpellStat(spell)))
             }
-            add(perk)
+            perk.add()
         }
     }
 }

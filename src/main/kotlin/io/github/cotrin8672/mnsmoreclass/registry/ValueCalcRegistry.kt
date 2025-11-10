@@ -5,10 +5,15 @@ import io.github.cotrin8672.mnsmoreclass.value_calc.ValueCalcBuilderKt
 
 object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate() {
     fun register() {
-        ValueCalcBuilderKt.of("simple_heal")
+        ValueCalcBuilderKt.of(SpellRegistry.BARKSKIN)
             .spellScaling(1f, 2f)
             .capScaling(1f)
             .build()
-            .run(::add)
+            .add()
+
+        // Purificationはデバフ解除なので計算不要だが、チャージシステムのため定義
+        ValueCalcBuilderKt.of(SpellRegistry.PURIFICATION)
+            .build()
+            .add()
     }
 }

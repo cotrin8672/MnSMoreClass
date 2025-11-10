@@ -7,8 +7,9 @@ import io.github.cotrin8672.mnsmoreclass.spell_school.SchoolBuilderKt
 object SpellSchoolRegistry : IMnsRegistry<SpellSchool> by MnsRegistryDelegate() {
     fun register() {
         SchoolBuilderKt.of("druid", "Druid")
-            .add("simple_heal", PointData(1, 0))
+            .add(SpellRegistry.BARKSKIN, PointData(1, 0))
+            .add(SpellRegistry.PURIFICATION, PointData(3, 1))
             .build()
-            .run(::add)
+            .add()
     }
 }
