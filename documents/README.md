@@ -37,6 +37,18 @@
    - データ生成
    - カスタムSpellAction作成
 
+5. **[05_PerkSystem.md](./05_PerkSystem.md)**
+   - Perkシステム（パッシブスキル）
+   - PerkBuilder使用方法
+   - OptScaleExactStat
+   - アイコン管理
+
+6. **[06_SpellSchool.md](./06_SpellSchool.md)**
+   - SpellSchoolシステム（クラス作成）
+   - SchoolBuilder使用方法
+   - ツリー構造設計
+   - PointData（座標配置）
+
 ---
 
 ## クイックスタート
