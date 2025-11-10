@@ -1,0 +1,17 @@
+{
+  "base": {
+    "max": 0.0,
+    "min": 0.0
+  },
+  "base_scaling_type": "NORMAL",
+  "cap_to_wep_dmg": 1000.0,
+  "dmg_effectiveness": {
+    "multi": {
+      "max": 500.0,
+      "min": 500.0
+    },
+    "stat": "health"
+  },
+  "id": "purification",
+  "stat_scalings": []
+}

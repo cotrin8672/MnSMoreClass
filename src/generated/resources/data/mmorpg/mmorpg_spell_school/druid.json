@@ -10,9 +10,13 @@
     30
   ],
   "perks": {
-    "simple_heal": {
+    "barkskin": {
       "x": 1,
       "y": 0
+    },
+    "purification": {
+      "x": 3,
+      "y": 1
     }
   }
 }
