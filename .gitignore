@@ -32,6 +32,7 @@ repo
 .claude
 .kotlin
 .vscode
+src/generated/resources/.cache
 
 # temporary files
 temp_*.py
