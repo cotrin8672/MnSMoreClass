@@ -8,14 +8,15 @@
 ## 目次
 
 1. [スペルシステム概要](#スペルシステム概要)
-2. [SpellBuilder](#spellbuilder)
-3. [SpellConfiguration](#spellconfiguration)
-4. [ComponentPart](#componentpart)
-5. [PartBuilder](#partbuilder)
-6. [SpellAction](#spellaction)
-7. [TargetSelector](#targetselector)
-8. [ValueCalculation](#valuecalculation)
-9. [実装パターン](#実装パターン)
+2. [Enum一覧](#enum一覧)
+3. [SpellBuilder](#spellbuilder)
+4. [SpellConfiguration](#spellconfiguration)
+5. [ComponentPart](#componentpart)
+6. [PartBuilder](#partbuilder)
+7. [SpellAction](#spellaction)
+8. [TargetSelector](#targetselector)
+9. [ValueCalculation](#valuecalculation)
+10. [実装パターン](#実装パターン)
 
 ---
 
@@ -30,6 +31,177 @@ Spell
 │   ├── TargetSelector[] (対象選択)
 │   └── SpellAction[] (実行アクション)
 └── ValueCalculation (ダメージ/回復計算式)
+```
+
+---
+
+## Enum一覧
+
+スペル作成で使用する主要なEnum。
+
+### PlayStyle（ビルドタイプ）
+
+スペルがどのステータスでスケールするかを示す：
+
+```kotlin
+PlayStyle.STR    // 筋力ビルド（近接、物理ダメージ）
+PlayStyle.DEX    // 敏捷ビルド（弓、回避、速度）
+PlayStyle.INT    // 知力ビルド（魔法、属性ダメージ）
+```
+
+**使用例**:
+```kotlin
+SpellBuilder.of("fireball", PlayStyle.INT, ...)  // 知力スケール
+SpellBuilder.of("slash", PlayStyle.STR, ...)     // 筋力スケール
+```
+
+### Elements（属性）
+
+ダメージ属性と耐性計算に使用：
+
+```kotlin
+Elements.Physical     // 物理
+Elements.Fire         // 火
+Elements.Cold         // 氷
+Elements.Nature       // 自然/雷（表示名は"Lightning"）
+Elements.Shadow       // 影/混沌（表示名は"Chaos"）
+Elements.Elemental    // 複合属性（Fire+Cold+Nature）
+Elements.ALL          // 全属性
+```
+
+**重要な注意**:
+- `Elements.Nature`の表示名は**"Lightning"**（雷）
+- `Elements.Shadow`の表示名は**"Chaos"**（混沌）
+- コード内では`Elements.Nature`だが、ゲーム内では「Lightning」と表示される
+- 光（Holy/Radiant）属性は存在しない
+
+**使用例**:
+```kotlin
+PartBuilder.damageInAoe(calc, Elements.Fire, 3.0)      // 火ダメージ
+PartBuilder.damage(calc, Elements.Nature)              // 雷ダメージ（表示は"Lightning"）
+PartBuilder.damage(calc, Elements.Shadow)              // 混沌ダメージ（表示は"Chaos"）
+```
+
+### SpellTag（スペルタグ）
+
+スペルの分類、検索、特殊効果のトリガー：
+
+```kotlin
+// プレイスタイル
+SpellTags.melee             // 近接
+SpellTags.ranged            // 遠隔
+SpellTags.magic             // 魔法
+SpellTags.weapon_skill      // 武器スキル
+
+// 機能
+SpellTags.damage            // ダメージ
+SpellTags.heal              // 回復
+SpellTags.area              // 範囲
+SpellTags.projectile        // プロジェクタイル
+SpellTags.MISSILE           // ミサイル
+SpellTags.summon            // 召喚
+SpellTags.movement          // 移動
+SpellTags.BUFF              // バフ
+
+// 特殊
+SpellTags.curse             // 呪い
+SpellTags.shield            // シールド
+SpellTags.shout             // シャウト
+SpellTags.song              // ソング（オーラ）
+SpellTags.trap              // トラップ
+SpellTags.totem             // トーテム
+SpellTags.golem             // ゴーレム
+SpellTags.beast             // ビースト
+SpellTags.arrow             // 矢
+SpellTags.chaining          // チェイニング
+SpellTags.thorns            // ソーン
+SpellTags.rejuvenate        // リジュベネート
+
+// 属性タグ
+SpellTags.PHYSICAL          // 物理
+SpellTags.FIRE              // 火
+SpellTags.COLD              // 氷
+SpellTags.LIGHTNING         // 雷
+SpellTags.CHAOS             // 混沌
+
+// システム
+SpellTags.SELF_DAMAGE       // 自傷ダメージ
+SpellTags.not_affected_by_cast_speed  // 詠唱速度の影響を受けない
+SpellTags.has_pet_ability   // ペット能力持ち
+SpellTags.minion_explode    // ミニオン爆発
+SpellTags.SHATTER           // シャッター
+SpellTags.CAST_TO_CD        // 詠唱速度→CD変換
+```
+
+**使用例**:
+```kotlin
+SpellBuilder.of(
+    "fireball",
+    PlayStyle.INT,
+    config,
+    "Fireball",
+    listOf(SpellTags.damage, SpellTags.projectile, SpellTags.area, SpellTags.FIRE)
+)
+```
+
+### CastingWeapon（武器要件）
+
+スペル使用可能な武器を制限：
+
+```kotlin
+CastingWeapon.MAGE_WEAPON      // 杖・魔法武器
+CastingWeapon.MELEE_WEAPON     // 近接武器（剣、斧、槍等）
+CastingWeapon.NON_MAGE_WEAPON  // 非魔法武器（近接+遠隔）
+CastingWeapon.RANGED           // 遠隔武器（弓、クロスボウ）
+CastingWeapon.ANY_WEAPON       // 任意の武器
+```
+
+**使用例**:
+```kotlin
+SpellBuilder.of(...)
+    .weaponReq(CastingWeapon.MAGE_WEAPON)  // 杖限定
+    .build()
+```
+
+### AllyOrEnemy（対象選択）
+
+ターゲット選択で味方/敵を指定：
+
+```kotlin
+AllyOrEnemy.allies            // 味方（自分含む）
+AllyOrEnemy.allies_not_self   // 味方（自分除く）
+AllyOrEnemy.enemies           // 敵
+AllyOrEnemy.non_ai_enemies    // AI持ち敵のみ（NoAI除外）
+AllyOrEnemy.pets              // ペット（バニラペット）
+AllyOrEnemy.casters_summons   // 召喚物（Mine and Slash召喚）
+AllyOrEnemy.summonShouldAttack// 召喚物が攻撃すべき対象
+AllyOrEnemy.all               // 全て
+```
+
+**使用例**:
+```kotlin
+PartBuilder.giveExileEffectToAlliesInRadius(...)     // 味方にバフ（自分含む）
+PartBuilder.addExileEffectToEnemiesInAoe(...)        // 敵にデバフ
+BaseTargetSelector.AOE.create(radius, ..., AllyOrEnemy.allies_not_self)  // 自分以外の味方
+```
+
+### ModType（修正タイプ）
+
+Statやダメージの修正方法：
+
+```kotlin
+ModType.FLAT       // 固定値加算 (+10)
+ModType.PERCENT    // パーセント加算 (+10%)
+ModType.MORE       // 乗算 (×1.1)
+```
+
+**計算順序**: FLAT → PERCENT → MORE
+
+**使用例**:
+```kotlin
+OptScaleExactStat(10, Stats.DAMAGE, ModType.FLAT)       // ダメージ+10
+OptScaleExactStat(15, Stats.DAMAGE, ModType.PERCENT)    // ダメージ+15%
+OptScaleExactStat(20, Stats.DAMAGE, ModType.MORE)       // ダメージ×1.2
 ```
 
 ---
@@ -209,6 +381,34 @@ config.mana_cost = LeveledValue(50f, 30f)   // Lv1: 50, Lv20: 30
 
 スペルの実行単位。`TargetSelector` + `SpellAction`で構成。
 
+### 内部構造
+
+```java
+public class ComponentPart {
+    public TargetSelector targeter;   // ターゲット選択
+    public List<SpellAction> acts;    // 実行アクション群
+    public String entityName;         // エンティティ名（オプション）
+}
+```
+
+**ComponentPartの実行フロー**:
+1. `targeter`でターゲットを選択（Collection<LivingEntity>）
+2. 選択されたターゲットに対して`acts`の各`SpellAction`を順番に実行
+
+### 構築方法
+
+```kotlin
+// 方法1: PartBuilderヘルパー使用（推奨）
+PartBuilder.damageInAoe(calc, element, radius)
+// → 内部で TargetSelector + SpellAction を自動構築
+
+// 方法2: 手動構築（低レベル）
+ComponentPart().apply {
+    targeter = BaseTargetSelector.AOE.create(radius, ...)
+    acts = listOf(SpellAction.DEAL_DAMAGE.create(...))
+}
+```
+
 ### ライフサイクル
 
 ```
@@ -216,6 +416,11 @@ onCast    → キャスト時に1回実行
 onTick    → 毎Tick実行（20 tick/秒）
 onExpire  → 終了時に1回実行
 ```
+
+**使い分け**:
+- `onCast`: 瞬間ダメージ、バフ付与、プロジェクタイル召喚
+- `onTick`: DoT（継続ダメージ）、HoT（継続回復）、パーティクル
+- `onExpire`: 爆発、終了時効果
 
 ### Entity Name System
 
@@ -233,6 +438,19 @@ onExpire  → 終了時に1回実行
 ```
 
 **利点**: 複数のプロジェクタイルを区別できる
+
+**実例**: プロジェクタイル召喚 → 着弾時に爆発ダメージ
+```kotlin
+SpellBuilder.of(...)
+    // 召喚時: プロジェクタイルに名前を付ける
+    .onCast(PartBuilder.justAction(
+        SpellAction.SUMMON_AT_SIGHT.create(EntityType.ARROW, 20*5.0, 1.5)
+            .put(MapField.ENTITY_NAME, "explosion_arrow")
+    ))
+    // 終了時: その名前のエンティティ位置で爆発
+    .onExpire("explosion_arrow", PartBuilder.damageInAoe(calc, Elements.Fire, 3.0))
+    .build()
+```
 
 ---
 
@@ -367,6 +585,58 @@ BaseTargetSelector.AOE.create(
 
 スペルの実際の処理を行うアクション。
 
+### 内部構造
+
+```java
+public abstract class SpellAction implements IGUID {
+    // グローバルレジストリ
+    public static HashMap<String, SpellAction> MAP = new HashMap<>();
+
+    // 必須実装
+    public abstract void tryActivate(
+        Collection<LivingEntity> targets,  // ターゲット群
+        SpellCtx ctx,                       // スペルコンテキスト
+        MapHolder data                      // アクションデータ
+    );
+
+    // ファクトリーメソッド（各実装で定義）
+    public MapHolder create(...);
+}
+```
+
+**実行フロー**:
+1. `ComponentPart`の`targeter`がターゲットを選択
+2. 選択されたターゲットに対して`acts`の各`SpellAction.tryActivate()`を呼び出し
+3. `data`（MapHolder）に格納されたパラメータを使用して処理
+
+### MapHolder構造
+
+SpellActionのデータコンテナ：
+
+```java
+public class MapHolder {
+    public String type;                    // SpellActionのGUID
+    public HashMap<String, Object> map;    // パラメータマップ
+
+    public MapHolder put(MapField field, Object value);
+    public <T> T get(MapField field);
+}
+```
+
+**使用例**:
+```kotlin
+// データ作成
+val data = SpellAction.DEAL_DAMAGE.create(
+    ValueCalculation.of("my_spell"),  // ダメージ計算式
+    Elements.Fire                      // 属性
+)
+
+// 内部的には MapHolder が作成される
+// data.type = "deal_damage"
+// data.map["element"] = Elements.Fire
+// data.map["value_calc"] = "my_spell"
+```
+
 ### 主要SpellAction
 
 ```java
@@ -390,36 +660,60 @@ SpellAction.ADD_CHARGE            // チャージ追加
 新しいアクションを追加する場合：
 
 ```kotlin
-class MyCustomAction : SpellAction(emptyList()) {
+class RemoveFireAction : SpellAction(emptyList()) {
     override fun tryActivate(
         targets: Collection<LivingEntity>,
         ctx: SpellCtx,
         data: MapHolder
     ) {
+        // データからパラメータ取得（必要に応じて）
+        // val param = data.get(MapField.SOME_FIELD)
+
         targets.forEach { entity ->
-            // カスタム処理
+            // カスタム処理: 火を消す
+            entity.clearFire()
         }
     }
 
+    // ファクトリーメソッド
     fun create(): MapHolder {
         val holder = MapHolder()
-        holder.type = GUID()
+        holder.type = GUID()  // "remove_fire"
         return holder
     }
 
-    override fun GUID(): String = "my_custom_action"
+    override fun GUID(): String = "remove_fire"
 }
 
-// 登録
-object MySpellActions {
-    val MY_ACTION: MyCustomAction = register(MyCustomAction())
+// 登録（MOD初期化時）
+object SpellActions {
+    val REMOVE_FIRE: RemoveFireAction = register(RemoveFireAction())
 
     private fun <T : SpellAction> register(action: T): T {
         SpellAction.MAP[action.GUID()] = action
         return action
     }
+
+    fun init() { }  // MODエントリーポイントで呼び出し
 }
 ```
+
+**使用例**:
+```kotlin
+// スペルで使用
+SpellBuilder.of(...)
+    .onCast(PartBuilder.justAction(
+        SpellActions.REMOVE_FIRE.create()  // カスタムアクション
+    ))
+    .build()
+```
+
+### ⚠️ カスタムSpellActionの注意点
+
+1. **登録タイミング**: MOD初期化時に`SpellAction.MAP`に登録必須
+2. **GUID衝突**: 他MODと衝突しないようプレフィックスを使用
+3. **データパック非対応**: カスタムSpellActionはJSONに含まれない（コード側のみ）
+4. **クライアント/サーバー**: サーバー側で実行される処理が多い（パーティクル等は例外）
 
 ---
 
