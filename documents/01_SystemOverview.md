@@ -82,6 +82,29 @@ ExileDB.Affixes()        // アフィックス
 ExileDB.Rarities()       // レアリティ
 ```
 
+#### ⚠️ アドオンからの登録の注意点
+
+**問題**: `ExileDB`は**Mine and Slashの初期化後**にしかアクセスできない。
+
+```kotlin
+// ❌ 間違い: init{}で直接アクセス
+object MyMod {
+    init {
+        ExileDB.Spells().addSerializable(...)  // NPE！
+    }
+}
+
+// ✅ 正しい: gatherDataイベントで登録
+@SubscribeEvent
+fun gatherData(event: GatherDataEvent) {
+    ExileDB.Spells().addSerializable(...)  // OK
+}
+```
+
+**解決策**:
+- Forgeの`GatherDataEvent`で登録処理を実行
+- または独自のレジストリを作成し、適切なタイミングで`ExileDB`に追加
+
 ### 3. **IGUID システム**
 
 すべてのレジスタブルオブジェクトは`IGUID`インターフェースを実装：
@@ -95,6 +118,32 @@ public interface IGUID {
 - **GUID（Global Unique ID）**: 文字列ベースの一意識別子
 - データ参照は全てGUID経由
 - タイプセーフ + 柔軟性
+
+#### ⚠️ GUID の名前空間衝突
+
+**問題**: GUIDは**グローバル**なので、Mine and Slash本体や他MODと衝突する可能性がある。
+
+```kotlin
+// ❌ 衝突の可能性
+ExileDB.Spells().addSerializable("fireball", spell)  // 本体に同名スペルがあるかも
+
+// ✅ プレフィックスで回避
+ExileDB.Spells().addSerializable("mymod_fireball", spell)
+```
+
+**ベストプラクティス**:
+- MOD IDをプレフィックスとして使用（例: `"druid_barkskin"`）
+- 定数で管理して typo を防ぐ
+
+```kotlin
+object SpellRegistry {
+    const val BARKSKIN = "druid_barkskin"  // 定数化
+
+    fun register() {
+        SpellBuilder.of(BARKSKIN, ...)  // typo防止
+    }
+}
+```
 
 ### 4. **Builder Pattern（ビルダーパターン）**
 
