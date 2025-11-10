@@ -1,3 +1,10 @@
 {
-  "mmorpg.asc_class.druid": "ドルイド"
+  "mmorpg.asc_class.druid": "ドルイド",
+  "mmorpg.spell.barkskin": "樹皮の護り",
+  "mmorpg.stat.learn_barkskin": "樹皮の護りを学ぶ",
+  "spell.desc.barkskin": "近くの味方にダメージ軽減と体力回復バフを付与する。",
+  "mmorpg.effect.barkskin": "樹皮の護り",
+  "mmorpg.spell.purification": "浄化",
+  "mmorpg.stat.learn_purification": "浄化を学ぶ",
+  "spell.desc.purification": "範囲内の味方のデバフを解除する。"
 }

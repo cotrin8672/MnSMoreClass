@@ -1,3 +1,10 @@
 {
-  "mmorpg.asc_class.druid": "Druid"
+  "mmorpg.asc_class.druid": "Druid",
+  "mmorpg.spell.barkskin": "Barkskin",
+  "mmorpg.stat.learn_barkskin": "Level to Barkskin",
+  "spell.desc.barkskin": "Grants damage reduction and health recovery buffs to nearby allies.",
+  "mmorpg.effect.barkskin": "Barkskin",
+  "mmorpg.spell.purification": "Purification",
+  "mmorpg.stat.learn_purification": "Level to Purification",
+  "spell.desc.purification": "Removes all debuffs from nearby allies."
 }
