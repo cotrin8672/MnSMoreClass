@@ -1,0 +1,25 @@
+{
+  "base": {
+    "max": 6.6000004,
+    "min": 0.9
+  },
+  "base_scaling_type": "NORMAL",
+  "cap_to_wep_dmg": 0.75,
+  "dmg_effectiveness": {
+    "multi": {
+      "max": 1.475,
+      "min": 0.825
+    },
+    "stat": "health"
+  },
+  "id": "entangling_thorns",
+  "stat_scalings": [
+    {
+      "multi": {
+        "max": 1.1,
+        "min": 0.45
+      },
+      "stat": "weapon_damage"
+    }
+  ]
+}

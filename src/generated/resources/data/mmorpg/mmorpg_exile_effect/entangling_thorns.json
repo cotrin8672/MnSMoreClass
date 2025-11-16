@@ -1,0 +1,65 @@
+{
+  "type": "negative",
+  "id": "entangling_thorns",
+  "max_stacks": 1,
+  "mc_stats": [
+    {
+      "type": "MORE",
+      "id": "minecraft:generic.movement_speed",
+      "uuid": "893c46ab-7bda-43dd-81ec-d0f71aafdbb2",
+      "val": -1.0
+    },
+    {
+      "type": "FLAT",
+      "id": "minecraft:generic.knockback_resistance",
+      "uuid": "0e58c71a-aee5-4d0f-94ba-98a183f6c465",
+      "val": 1.0
+    }
+  ],
+  "one_of_a_kind_id": "",
+  "spell": {
+    "entity_components": {
+      "default_entity_name": [
+        {
+          "acts": [
+            {
+              "type": "damage",
+              "map": {
+                "dmg_effect_type": "dot",
+                "element": "Elemental",
+                "value_calculation": "entangling_thorns"
+              }
+            }
+          ],
+          "en_preds": [],
+          "ifs": [
+            {
+              "type": "x_ticks_condition",
+              "map": {
+                "tick_rate": 20.0
+              }
+            }
+          ],
+          "targets": [
+            {
+              "type": "target",
+              "map": {}
+            }
+          ]
+        }
+      ]
+    },
+    "on_cast": []
+  },
+  "spell_tags": {
+    "tags": []
+  },
+  "stacks_affect_stats": true,
+  "stats": [],
+  "tags": {
+    "tags": [
+      "negative",
+      "immobilizing"
+    ]
+  }
+}
