@@ -194,13 +194,12 @@ object NinjaSpells {
             .animations(SpellAnimations.SPIN, SpellAnimations.CAST_FINISH)
             .weaponReq(CastingWeapon.MELEE_WEAPON)
             .onCast(PartBuilder.playSound(SoundEvents.CHAIN_BREAK, 1.0, 1.0))
-            .onCast(PartBuilder.groundEdgeParticles(ParticleTypes.SWEEP_ATTACK, 40.0, 2.0, 0.2))
+            .onCast(PartBuilder.groundEdgeParticles(ParticleTypes.SWEEP_ATTACK, 40.0, 3.0, 0.2))
             .onCast(
-                PartBuilder.damageInAoe(ValueCalcRegistry.SwingScythe, Elements.Physical, 3.0)
+                PartBuilder.damageInAoe(ValueCalcRegistry.SwingScythe, Elements.Physical, 5.0)
                     .addPerEntityHit(PartBuilder.justAction(SpellAction.TP_TARGET_TO_SELF.create()))
                     .addPerEntityHit(PartBuilder.groundEdgeParticles(ParticleTypes.CRIT, 20.0, 1.5, 0.1))
             )
-            .levelReq(22)
             .buildForEffect()
 
     val ShadowSecret =
