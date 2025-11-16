@@ -144,9 +144,9 @@ publisher {
         modrinth(System.getenv("MODRINTH_API_KEY"))
     }
 
-    curseID.set("1369188")
-    modrinthID.set("EM6nDwFW")
-    versionType.set("release")
+    curseID.set("1386060")
+    modrinthID.set("DBGdxjVe")
+    versionType.set("alpha")
     changelog.set(file("changelog.md"))
     version.set(project.version.toString())
     displayName.set("$modName $modVersion")
@@ -157,12 +157,10 @@ publisher {
 
     curseDepends {
         required("kotlin-for-forge")
-        required("sophisticated-backpacks")
         required("mine-and-slash")
     }
     modrinthDepends {
         required("kotlin-for-forge")
-        required("sophisticated-backpacks")
         required("mine-and-slash")
     }
 }
