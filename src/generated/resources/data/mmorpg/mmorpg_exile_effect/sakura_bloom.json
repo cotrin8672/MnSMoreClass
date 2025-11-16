@@ -1,0 +1,25 @@
+{
+  "type": "beneficial",
+  "id": "sakura_bloom",
+  "max_stacks": 1,
+  "mc_stats": [
+    {
+      "type": "MORE",
+      "id": "minecraft:generic.attack_speed",
+      "uuid": "f0a612fe-1c02-4c9c-ac6b-6f6a41cc0f5b",
+      "val": 0.15
+    }
+  ],
+  "one_of_a_kind_id": "",
+  "spell_tags": {
+    "tags": []
+  },
+  "stacks_affect_stats": true,
+  "stats": [],
+  "tags": {
+    "tags": [
+      "offensive",
+      "positive"
+    ]
+  }
+}

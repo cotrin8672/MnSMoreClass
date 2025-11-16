@@ -1,0 +1,25 @@
+{
+  "base": {
+    "max": 36.0,
+    "min": 6.0
+  },
+  "base_scaling_type": "NORMAL",
+  "cap_to_wep_dmg": 0.25,
+  "dmg_effectiveness": {
+    "multi": {
+      "max": 0.725,
+      "min": 0.325
+    },
+    "stat": "health"
+  },
+  "id": "sakura_bloom",
+  "stat_scalings": [
+    {
+      "multi": {
+        "max": 0.6,
+        "min": 0.2
+      },
+      "stat": "weapon_damage"
+    }
+  ]
+}
