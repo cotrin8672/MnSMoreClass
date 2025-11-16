@@ -1,48 +1,63 @@
-# SophisticatedMAS
+# M'n'S: More Class
 
-An addon mod for **Mine and Slash** and **Sophisticated Backpacks** that adds automatic gear salvaging directly in your
-backpack!
+Expand your *Mine and Slash* experience with additional ascension classes, each bringing unique playstyles and abilities to your adventures.
 
-## What does this mod do?
+## Overview
 
-This mod adds the **Auto Salvage Upgrade** for Sophisticated Backpacks. When installed in your backpack, it
-automatically salvages Mine and Slash gear items based on your salvage settings - no more manual trips to the salvaging
-station!
+**M'n'S: More Class** adds fully-integrated spell schools, unique buffs/debuffs, custom perks, and balanced progression nodes that feel native to the Mine and Slash ecosystem. Each class brings a distinct playstyle to enhance party dynamics and solo gameplay.
 
 ## Features
 
-- 🔄 **Automatic Salvaging**: Gear items are automatically salvaged when they enter your backpack
-- ⚙️ **Respects Your Settings**: Uses your Mine and Slash auto-salvage configuration (rarity, type, etc.)
-- 📦 **Convenient Storage**: Salvage materials go straight into your backpack
+### Ascension Classes
 
-## How to Use
+#### Druid – Nature Support Specialist
+A versatile spellcaster focused on healing, protection, and battlefield control through nature magic.
 
-1. **Craft the Auto Salvage Upgrade**
-    - Check your in-game recipe viewer (JEI/REI) for the recipe
+**Spell Lineup:**
+- **Barkskin** – Grant nearby allies damage reduction with protective bark armor
+- **Purification** – Cleanse harmful debuffs from yourself and allies in a wide radius
+- **Weakness Aura** – Project a debilitating aura that reduces enemy armor in front of you
+- **Entangling Thorns** – Anchor a stationary thornfield that immobilizes and damages enemies over time
+- **Sakura Bloom** – Summon a healing sakura grove that restores health and grants attack speed to nearby allies
 
-2. **Install it in your backpack**
-    - Open your Sophisticated Backpack
-    - Go to the Upgrades tab
-    - Place the Auto Salvage Upgrade in an upgrade slot
+#### Ninja – Agile Shadow Striker
+A high-mobility melee specialist wielding shurikens, scythes, and shadow techniques.
 
-3. **Configure your salvage settings in Mine and Slash**
-    - Set which rarities you want to auto-salvage
-    - Configure gear type filters
+**Spell Lineup:**
+- **Shadow Walk** – Dash forward through shadows with enhanced movement
+- **Shuriken** – Hurl throwing stars at enemies from range
+- **Shunjin** – Lightning-fast strike that boosts attack speed
+- **Toxic Edge** – Poison-infused blade attack that applies damage over time
+- **Ryuusei Ranbu** – Devastating meteor rush combo attack
+- **Swing Scythe** – Wide sweeping scythe attack for AoE damage
+- **Shadow Secret** – Ultimate shadow technique for burst damage
 
-4. **Done!**
-    - Gear matching your settings will be automatically salvaged
-    - Materials will appear in your backpack
+### Complete Integration
 
-## Issues & Support
+Each class includes:
+- Dedicated spell school trees with unlockable nodes
+- Custom exile effects (buffs/debuffs) unique to each spell
+- Balanced perks that synergize with Mine and Slash's progression systems
+- Full localization support (English and Japanese)
 
-Found a bug or have a suggestion? Please report it on
-our [GitHub Issues](https://github.com/yourusername/SophisticatedMAS/issues) page.
+## Requirements
+
+- **Minecraft:** 1.20.1
+- **Mod Loader:** Forge
+- **Dependencies:** Mine and Slash (by RobertX22)
+
+## Installation
+
+1. Download the latest release from CurseForge or Modrinth
+2. Install Mine and Slash if you haven't already
+3. Place the mod JAR in your mods folder
+4. Launch Minecraft with Forge
 
 ## Credits
 
-Made with ❤️ for the Mine and Slash and Sophisticated Backpacks communities
+**Created by:** cotrin8672 and the MnSMoreClass team
+**Mine and Slash by:** RobertX22
 
-Special thanks to:
+## License
 
-- **P3pp3rF1y** - Creator of Sophisticated Backpacks
-- **RobertX22** - Creator of Mine and Slash
+This mod is an addon for Mine and Slash and respects all licensing requirements of the parent mod.
