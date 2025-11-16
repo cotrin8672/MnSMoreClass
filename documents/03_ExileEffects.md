@@ -22,13 +22,13 @@
 
 ### バニラポーションとの違い
 
-| 項目 | ExileEffect | バニラポーション |
-|------|------------|----------------|
-| **Stat操作** | Mine and Slash独自Stat | バニラAttribute |
-| **スタック** | 可能（maxStacks設定） | 不可 |
-| **スペル連携** | 可能（onTick等） | 不可 |
-| **表示** | カスタムUI | バニラUI |
-| **柔軟性** | 非常に高い | 限定的 |
+| 項目           | ExileEffect            | バニラポーション |
+| -------------- | ---------------------- | ---------------- |
+| **Stat操作**   | Mine and Slash独自Stat | バニラAttribute  |
+| **スタック**   | 可能（maxStacks設定）  | 不可             |
+| **スペル連携** | 可能（onTick等）       | 不可             |
+| **表示**       | カスタムUI             | バニラUI         |
+| **柔軟性**     | 非常に高い             | 限定的           |
 
 ### EffectType
 
@@ -37,6 +37,45 @@ EffectType.positive   // バフ
 EffectType.negative   // デバフ
 EffectType.neutral    // どちらでもない
 ```
+
+### ライフサイクルと内部処理
+
+エフェクトは適用→維持→解除の 3 段階を持ちます。
+
+- **onApply**: バニラ Attribute (`mc_stats`) を適用し、装備キャッシュを更新。`one_of_a_kind_id` が設定されている場合は同系統のエフェクトを競合排除します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#211-235
+- **tick**: `EntityStatusEffectsData.tick()` が毎 tick `ticks_left` を減らし、`ExileEffect.onTick()` を呼びます。`onTick` は付随 Spell があれば `SpellCtx.onTick` で実行します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/vanilla_mc/potion_effects/EntityStatusEffectsData.java#29-72 @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#119-138
+- **onRemove**: バニラ Attribute を解除し、付随 Spell の `onExpire` を呼び、スタック数をリセットします。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#245-265
+
+`EntityStatusEffectsData.tick()` は 80 tick ごとに「スペル再割り当てを失った自キャスト効果」を追加で除去し、`removed` リスト経由で `onRemove` を順次実行します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/vanilla_mc/potion_effects/EntityStatusEffectsData.java#47-71
+
+### インスタンスデータの構造
+
+各効果は `ExileEffectInstanceData` にシリアライズされ、以下の情報を保持します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffectInstanceData.java#15-79
+
+| フィールド | 役割 |
+| --- | --- |
+| `ticks_left` | 残り Tick。`is_infinite == true` の場合は無視され UI では \u221E 表示 |
+| `stacks` | 現在のスタック数。0 未満で `shouldRemove()` |
+| `str_multi` | 効果強度の倍率（パークやタレントから加算） |
+| `self_cast` | 自己付与かどうか。スペルの再割り当て確認に利用 |
+| `caster_uuid` | 付与者の UUID。`getCaster(Level)` で照会 |
+| `spell_id` / `calcSpell` | 関連 Spell を取得し、`onTick`/`onExpire` で使用 |
+
+### スタックとチャージの制御
+
+- 最大スタックは `max_stacks` と `EntityData.maxCharges` の和で決定されます。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#49-53
+- `stacks_affect_stats = false` を指定すると、スタック数に応じた Stat 増幅が無効化されます。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#56-58
+- `getExactStats` ではスタック数と `str_multi` を加味して `StatMod` を `ExactStatData` に変換します。カスタム効果の数値調整時はこの処理を理解しておくとデバッグが容易です。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#143-168
+
+### 解除条件とタグ連携
+
+- `remove_on_spell_cast` に指定した `SpellTag` を持つスペルをキャストすると、自動的に効果が解除されます。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#56-57 @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/exile_effects/ExileEffectBuilder.java#70-73
+- `EffectTag` は UI 表示だけでなく、`RemoveNegative` などの解除アクションや `ExileEffectUtils.countEffectsWithTag` を使った条件分岐に利用されます。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/uncommon/utilityclasses/ExileEffectUtils.java#11-24
+
+### UI 資産とツールチップ
+
+- テクスチャは `textures/item/mob_effects/<effect_id>.png` を参照し、`getEffectDisplayItem()` は `ForgeRegistries.ITEMS` から `mob_effects/<effect_id>` を解決します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#80-88
+- `GetTooltipString` は Stat 情報、スタック数、タグ一覧を動的に組み立てます。カスタム説明文 (`locdesc`) を追加するときはこれらの行に合わせて表示を確認してください。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/exile_effects/ExileEffect.java#172-207
 
 ---
 
@@ -367,6 +406,29 @@ ExileEffectBuilder.of("berserk")
     .addTags(EffectTags.positive)
     .build()
 ```
+
+### パターン6: 被ダメージトリガー（自傷型デバフ）
+
+```kotlin
+ExileEffectBuilder.of("thorn")
+    .maxStacks(5)
+    .spell(
+        SpellBuilder.forEffect()
+            .addSpecificAction(
+                SpellCtx.ON_ENTITY_ATTACKED,
+                PartBuilder.damage(SpellCalcs.THORN_CONSUME, Elements.Physical)
+            )
+            .addSpecificAction(
+                SpellCtx.ON_ENTITY_ATTACKED,
+                PartBuilder.removeExileEffectStacksToTarget("thorn")
+            )
+            .buildForEffect()
+    )
+    .addTags(EffectTags.negative)
+    .build()
+```
+
+> **注意**: `target` を明示的に変更しない限り `PartBuilder.damage(...)` はエフェクト保持者自身に適用される。`thorn` は攻撃された際に**自分が追加ダメージを受けつつスタックを消費するデバフ**であり、攻撃者への反射ダメージではない点に注意。
 
 ---
 

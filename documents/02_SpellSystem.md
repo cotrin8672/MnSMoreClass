@@ -583,137 +583,118 @@ BaseTargetSelector.AOE.create(
 
 ## SpellAction
 
-スペルの実際の処理を行うアクション。
+スペルで実際の処理を担当するアクションブロック。`ComponentPart` が指定したターゲット集合に対し、ここで定義したロジックを実行します。
 
-### 内部構造
+### クラス構造とライフサイクル
 
 ```java
-public abstract class SpellAction implements IGUID {
-    // グローバルレジストリ
+public abstract class SpellAction extends BaseFieldNeeder implements IGUID {
     public static HashMap<String, SpellAction> MAP = new HashMap<>();
 
-    // 必須実装
+    protected SpellAction(List<MapField> requiredPieces) { ... }
+
     public abstract void tryActivate(
-        Collection<LivingEntity> targets,  // ターゲット群
-        SpellCtx ctx,                       // スペルコンテキスト
-        MapHolder data                      // アクションデータ
+        Collection<LivingEntity> targets,
+        SpellCtx ctx,
+        MapHolder data
     );
-
-    // ファクトリーメソッド（各実装で定義）
-    public MapHolder create(...);
 }
 ```
 
-**実行フロー**:
-1. `ComponentPart`の`targeter`がターゲットを選択
-2. 選択されたターゲットに対して`acts`の各`SpellAction.tryActivate()`を呼び出し
-3. `data`（MapHolder）に格納されたパラメータを使用して処理
+1. `ComponentPart` がターゲットを選定（`BaseTargetSelector`）。
+2. 生成済み `MapHolder` を渡しつつ `SpellAction.tryActivate(...)` が呼ばれる。
+3. アクション実装がターゲットそれぞれに処理を行う。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spells/components/ComponentPart.java#108-135
 
-### MapHolder構造
+### コンストラクタの役割と必須フィールド
 
-SpellActionのデータコンテナ：
+`SpellAction` のコンストラクタは **「必要な引数（パラメータ）を宣言する場所」** です。リストで指定した `MapField` が `MapHolder` に入っていないと `validate()` で失敗します。
 
 ```java
-public class MapHolder {
-    public String type;                    // SpellActionのGUID
-    public HashMap<String, Object> map;    // パラメータマップ
+public class DamageAction extends SpellAction {
+    public DamageAction() {
+        super(Arrays.asList(MapField.ELEMENT, MapField.VALUE_CALCULATION));
+    }
 
-    public MapHolder put(MapField field, Object value);
-    public <T> T get(MapField field);
+    @Override
+    public void tryActivate(...) { ... }
 }
 ```
 
-**使用例**:
-```kotlin
-// データ作成
-val data = SpellAction.DEAL_DAMAGE.create(
-    ValueCalculation.of("my_spell"),  // ダメージ計算式
-    Elements.Fire                      // 属性
-)
+- `MapField.ELEMENT` や `MapField.VALUE_CALCULATION` が必須パラメータ。
+- `ComponentPart.validate()` が `MapHolder` の中身を検証する。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spells/components/actions/DamageAction.java#23-101 @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spells/components/ComponentPart.java#79-133
 
-// 内部的には MapHolder が作成される
-// data.type = "deal_damage"
-// data.map["element"] = Elements.Fire
-// data.map["value_calc"] = "my_spell"
-```
+必須項目が無い場合は `SpellAction(emptyList())` のように空リストを渡せば OK（例: 火を消すだけのカスタムアクション）。@MnSMoreClass/src/main/kotlin/io/github/cotrin8672/mnsmoreclass/spell_action/RemoveFireAction.kt#8-27
 
-### 主要SpellAction
+### MapHolder と MapField = 型付き引数
 
-```java
-SpellAction.DEAL_DAMAGE           // ダメージ
-SpellAction.RESTORE_HEALTH        // 回復
-SpellAction.EXILE_EFFECT          // ExileEffect付与/解除
-SpellAction.POTION                // バニラポーション付与/解除
-SpellAction.SUMMON_PROJECTILE     // プロジェクタイル召喚
-SpellAction.SUMMON_AT_SIGHT       // 視線方向に召喚
-SpellAction.SUMMON_BLOCK          // ブロック召喚
-SpellAction.PLAY_SOUND            // サウンド再生
-SpellAction.PARTICLES_IN_RADIUS   // パーティクル生成
-SpellAction.PUSH                  // ノックバック
-SpellAction.KNOCKBACK             // ノックバック
-SpellAction.TP_CASTER_IN_DIRECTION // テレポート
-SpellAction.ADD_CHARGE            // チャージ追加
-```
-
-### カスタムSpellAction作成
-
-新しいアクションを追加する場合：
+`MapHolder` は実際の値を保持するコンテナで、`MapField` がそのキー兼型情報です。`put(field, value)` で登録し、`get(field)` で安全に取得します。
 
 ```kotlin
-class RemoveFireAction : SpellAction(emptyList()) {
-    override fun tryActivate(
-        targets: Collection<LivingEntity>,
-        ctx: SpellCtx,
-        data: MapHolder
-    ) {
-        // データからパラメータ取得（必要に応じて）
-        // val param = data.get(MapField.SOME_FIELD)
-
-        targets.forEach { entity ->
-            // カスタム処理: 火を消す
-            entity.clearFire()
-        }
-    }
-
-    // ファクトリーメソッド
-    fun create(): MapHolder {
-        val holder = MapHolder()
-        holder.type = GUID()  // "remove_fire"
-        return holder
-    }
-
-    override fun GUID(): String = "remove_fire"
-}
-
-// 登録（MOD初期化時）
-object SpellActions {
-    val REMOVE_FIRE: RemoveFireAction = register(RemoveFireAction())
-
-    private fun <T : SpellAction> register(action: T): T {
-        SpellAction.MAP[action.GUID()] = action
-        return action
-    }
-
-    fun init() { }  // MODエントリーポイントで呼び出し
-}
+val holder = SpellAction.DEAL_DAMAGE.create(calc, Elements.Fire)
+holder.get(MapField.ELEMENT)          // => "Fire"
+holder.get(MapField.VALUE_CALCULATION) // => ValueCalculation インスタンス
 ```
 
-**使用例**:
-```kotlin
-// スペルで使用
-SpellBuilder.of(...)
-    .onCast(PartBuilder.justAction(
-        SpellActions.REMOVE_FIRE.create()  // カスタムアクション
-    ))
-    .build()
-```
+MapHolder 生成時に `holder.type = SpellAction.GUID()` を忘れないこと。これで `ComponentPart` がどのアクションかを識別します。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spells/map_fields/MapField.java#15-123
 
-### ⚠️ カスタムSpellActionの注意点
+### 代表的な組み込み SpellAction
 
-1. **登録タイミング**: MOD初期化時に`SpellAction.MAP`に登録必須
-2. **GUID衝突**: 他MODと衝突しないようプレフィックスを使用
-3. **データパック非対応**: カスタムSpellActionはJSONに含まれない（コード側のみ）
-4. **クライアント/サーバー**: サーバー側で実行される処理が多い（パーティクル等は例外）
+| GUID | 役割 |
+| --- | --- |
+| `damage` | 単体/範囲ダメージ。`ELEMENT` と `VALUE_CALCULATION` が必須 |
+| `restore_health` / `restore_mana` | 回復量を付与 |
+| `exile_effect` | ExileEffect を付与/解除 |
+| `potion` | バニラポーション効果の操作 |
+| `summon_projectile` / `summon_at_sight` / `summon_block` | 各種召喚 |
+| `play_sound` / `particles_in_radius` | 視覚・聴覚エフェクト |
+| `push` / `knockback` | 移動・ノックバック操作 |
+| `tp_caster_in_dir` / `tp_target_to_self` | テレポート系 |
+| `add_charge` | スペルチャージの加算 |
+
+（実装は `SpellAction` クラス末尾の static 初期化で確認可能）@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spells/components/actions/SpellAction.java#23-68
+
+### カスタム SpellAction 作成フロー（Addon側）
+
+1. **実装クラスを作る**
+   ```kotlin
+   class RemoveFireAction : SpellAction(emptyList()) {
+       override fun tryActivate(targets: Collection<LivingEntity>, ctx: SpellCtx, data: MapHolder) {
+           targets.forEach { it.clearFire() }
+       }
+
+       fun create(): MapHolder = MapHolder().apply { type = GUID() }
+       override fun GUID(): String = "mnsmoreclass_remove_fire"
+   }
+   ```
+
+2. **起動時に登録**
+   ```kotlin
+   object SpellActions {
+       val REMOVE_FIRE = register(RemoveFireAction())
+
+       private fun <T : SpellAction> register(action: T): T {
+           SpellAction.MAP[action.GUID()] = action
+           return action
+       }
+
+       fun init() {} // Mod エントリーポイントで呼び出す
+   }
+   ```@MnSMoreClass/src/main/kotlin/io/github/cotrin8672/mnsmoreclass/spell_action/SpellActions.kt#5-15
+
+3. **ComponentPart から呼ぶ**
+   ```kotlin
+   SpellBuilder.of(...)
+       .onCast(PartBuilder.justAction(SpellActions.REMOVE_FIRE.create()))
+       .build()
+   ```
+
+### 実装時の注意点
+
+1. **登録タイミング**: MOD 初期化時に `SpellAction.MAP` に追加。未登録だと JSON 生成時に null 参照になります。
+2. **GUID 衝突回避**: 自作アクションは `mnsmoreclass_` などプレフィックスを付けて衝突を防止。
+3. **データパック化不可**: カスタム SpellAction はコード側に限られ、データパックでの追加は不可。
+4. **サーバー側処理前提**: `tryActivate` はサーバー側で動く設計。パーティクルを出す場合は `ctx.world.isClientSide` チェックを入れる。
+5. **MapField 整合性**: 必須 `MapField` を宣言したら、`create()` で必ず値をセットすること。足りないと `ComponentPart.validate()` が失敗する。
 
 ---
 
