@@ -1,0 +1,209 @@
+{
+  "attached": {
+    "entity_components": {},
+    "on_cast": [
+      {
+        "acts": [
+          {
+            "type": "sound",
+            "map": {
+              "pitch": 1.2,
+              "sound": "minecraft:block.enchantment_table.use",
+              "volume": 1.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": []
+      },
+      {
+        "acts": [
+          {
+            "type": "exile_effect",
+            "map": {
+              "count": 1.0,
+              "exile_potion_id": "toxic_edge",
+              "potion_action": "GIVE_STACKS",
+              "potion_dur": 6000.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": [
+          {
+            "type": "self",
+            "map": {}
+          }
+        ]
+      },
+      {
+        "acts": [
+          {
+            "type": "exile_effect",
+            "map": {
+              "count": 1.0,
+              "exile_potion_id": "toxic_edge",
+              "potion_action": "GIVE_STACKS",
+              "potion_dur": 6000.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": [
+          {
+            "type": "self",
+            "map": {}
+          }
+        ]
+      },
+      {
+        "acts": [
+          {
+            "type": "exile_effect",
+            "map": {
+              "count": 1.0,
+              "exile_potion_id": "toxic_edge",
+              "potion_action": "GIVE_STACKS",
+              "potion_dur": 6000.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": [
+          {
+            "type": "self",
+            "map": {}
+          }
+        ]
+      },
+      {
+        "acts": [
+          {
+            "type": "exile_effect",
+            "map": {
+              "count": 1.0,
+              "exile_potion_id": "toxic_edge",
+              "potion_action": "GIVE_STACKS",
+              "potion_dur": 6000.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": [
+          {
+            "type": "self",
+            "map": {}
+          }
+        ]
+      },
+      {
+        "acts": [
+          {
+            "type": "exile_effect",
+            "map": {
+              "count": 1.0,
+              "exile_potion_id": "toxic_edge",
+              "potion_action": "GIVE_STACKS",
+              "potion_dur": 6000.0
+            }
+          }
+        ],
+        "en_preds": [],
+        "ifs": [
+          {
+            "type": "on_spell_cast",
+            "map": {}
+          }
+        ],
+        "targets": [
+          {
+            "type": "self",
+            "map": {}
+          }
+        ]
+      }
+    ]
+  },
+  "cast_animation": {
+    "id": "steady_cast"
+  },
+  "cast_finish_animation": {
+    "id": "cast_finish"
+  },
+  "config": {
+    "aggro_radius": 10,
+    "cast_time_ticks": 0,
+    "castingWeapon": "MELEE_WEAPON",
+    "charge_name": "",
+    "charge_regen": 0,
+    "charges": 0,
+    "cooldown_ticks": 160,
+    "ene_cost": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "imbues": 0,
+    "mana_cost": {
+      "max": 11.25,
+      "min": 15.0
+    },
+    "slows_when_casting": true,
+    "style": "dex",
+    "summonType": "NONE",
+    "summon_basic_atk": "",
+    "swing_arm": true,
+    "tags": {
+      "tags": [
+        "ranged",
+        "weapon_skill",
+        "buff"
+      ]
+    },
+    "times_to_cast": 1,
+    "tracking_radius": 5,
+    "tracks": "enemies",
+    "use_support_gems_from": ""
+  },
+  "default_lvl": 0,
+  "disabled_dims": [],
+  "effect_tip": "",
+  "identifier": "toxic_edge",
+  "loc_name": "Toxic Edge",
+  "lvl_based_on_spell": "",
+  "manual_tip": true,
+  "max_lvl": 16,
+  "min_lvl": 1,
+  "show_other_spell_tooltip": "",
+  "statsForSkillGem": [],
+  "weight": 1000
+}

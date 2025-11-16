@@ -4,6 +4,7 @@ import com.robertx22.mine_and_slash.database.data.spells.components.actions.Spel
 
 object SpellActions {
     val REMOVE_FIRE: RemoveFireAction = register(RemoveFireAction())
+    val TELEPORT_BEHIND_TARGET: TeleportBehindTargetAction = register(TeleportBehindTargetAction())
 
     private fun <T : SpellAction> register(action: T): T {
         SpellAction.MAP[action.GUID()] = action

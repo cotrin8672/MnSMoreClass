@@ -1,0 +1,25 @@
+{
+  "base": {
+    "max": 15.0,
+    "min": 2.0
+  },
+  "base_scaling_type": "NORMAL",
+  "cap_to_wep_dmg": 0.5,
+  "dmg_effectiveness": {
+    "multi": {
+      "max": 2.75,
+      "min": 1.25
+    },
+    "stat": "health"
+  },
+  "id": "shadow_walk",
+  "stat_scalings": [
+    {
+      "multi": {
+        "max": 2.5,
+        "min": 1.0
+      },
+      "stat": "weapon_damage"
+    }
+  ]
+}

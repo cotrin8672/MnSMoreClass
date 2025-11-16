@@ -1,0 +1,25 @@
+{
+  "type": "beneficial",
+  "id": "shunjin",
+  "max_stacks": 1,
+  "mc_stats": [
+    {
+      "type": "MORE",
+      "id": "minecraft:generic.attack_speed",
+      "uuid": "61ad1e2c-3b16-4d8f-9fa0-d95d8f1792f6",
+      "val": 0.3
+    }
+  ],
+  "one_of_a_kind_id": "",
+  "spell_tags": {
+    "tags": []
+  },
+  "stacks_affect_stats": true,
+  "stats": [],
+  "tags": {
+    "tags": [
+      "offensive",
+      "positive"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "ninja",
+  "lvl_reqs": [
+    1,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30
+  ],
+  "perks": {
+    "ryuusei_ranbu": {
+      "x": 5,
+      "y": 2
+    },
+    "shadow_secret": {
+      "x": 5,
+      "y": 6
+    },
+    "shadow_walk": {
+      "x": 1,
+      "y": 0
+    },
+    "shunjin": {
+      "x": 3,
+      "y": 1
+    },
+    "shuriken": {
+      "x": 2,
+      "y": 0
+    },
+    "swing_scythe": {
+      "x": 4,
+      "y": 1
+    },
+    "toxic_edge": {
+      "x": 4,
+      "y": 3
+    }
+  }
+}

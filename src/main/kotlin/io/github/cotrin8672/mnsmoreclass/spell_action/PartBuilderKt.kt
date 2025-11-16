@@ -8,12 +8,12 @@ import com.robertx22.mine_and_slash.database.data.spells.components.selectors.Ta
 import com.robertx22.mine_and_slash.uncommon.utilityclasses.AllyOrEnemy
 import com.robertx22.mine_and_slash.uncommon.utilityclasses.EntityFinder
 
-object PartBuilderExtensions {
+object PartBuilderKt {
     /**
      * 範囲内のターゲットのExileEffect（負のエフェクト）を解除
      */
     @JvmStatic
-    fun removeExileEffectInRadius(radius: Double, allyOrEnemy: AllyOrEnemy = AllyOrEnemy.allies): ComponentPart {
+    fun removeExileEffectInRadius(radius: Double, allyOrEnemy: AllyOrEnemy): ComponentPart {
         val part = ComponentPart()
         part.targets.add(
             BaseTargetSelector.AOE.create(
@@ -30,7 +30,7 @@ object PartBuilderExtensions {
      * 範囲内のターゲットの炎上を解除
      */
     @JvmStatic
-    fun removeFireInRadius(radius: Double, allyOrEnemy: AllyOrEnemy = AllyOrEnemy.allies): ComponentPart {
+    fun removeFireInRadius(radius: Double, allyOrEnemy: AllyOrEnemy): ComponentPart {
         val part = ComponentPart()
         part.targets.add(
             BaseTargetSelector.AOE.create(
@@ -47,7 +47,11 @@ object PartBuilderExtensions {
      * 範囲内のターゲットのバニラポーション（負のエフェクト）を解除
      */
     @JvmStatic
-    fun removePotionEffectInRadius(radius: Double, count: Double = 100.0, allyOrEnemy: AllyOrEnemy = AllyOrEnemy.allies): ComponentPart {
+    fun removePotionEffectInRadius(
+        radius: Double,
+        count: Double,
+        allyOrEnemy: AllyOrEnemy,
+    ): ComponentPart {
         val part = ComponentPart()
         part.targets.add(
             BaseTargetSelector.AOE.create(
@@ -86,7 +90,7 @@ object PartBuilderExtensions {
      * キャスターのバニラポーション（負のエフェクト）を解除
      */
     @JvmStatic
-    fun removePotionEffectOnCaster(count: Double = 100.0): ComponentPart {
+    fun removePotionEffectOnCaster(count: Double): ComponentPart {
         val part = ComponentPart()
         part.targets.add(TargetSelector.CASTER.create())
         part.acts.add(SpellAction.POTION.removeNegative(count))
@@ -104,5 +108,22 @@ object PartBuilderExtensions {
             removeExileEffectInRadius(radius, AllyOrEnemy.allies),
             removeFireInRadius(radius, AllyOrEnemy.allies)
         )
+    }
+
+    /**
+     * 対象となる敵の背後へ瞬間移動
+     */
+    @JvmStatic
+    fun teleportBehindTarget(distance: Double, searchRadius: Double): ComponentPart {
+        val part = ComponentPart()
+        part.targets.add(
+            BaseTargetSelector.AOE.create(
+                searchRadius,
+                EntityFinder.SelectionType.RADIUS,
+                AllyOrEnemy.enemies
+            )
+        )
+        part.acts.add(SpellActions.TELEPORT_BEHIND_TARGET.create(distance))
+        return part
     }
 }

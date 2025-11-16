@@ -1,0 +1,25 @@
+{
+  "base": {
+    "max": 12.0,
+    "min": 1.5
+  },
+  "base_scaling_type": "NORMAL",
+  "cap_to_wep_dmg": 0.25,
+  "dmg_effectiveness": {
+    "multi": {
+      "max": 2.125,
+      "min": 0.875
+    },
+    "stat": "health"
+  },
+  "id": "ryuusei_ranbu",
+  "stat_scalings": [
+    {
+      "multi": {
+        "max": 2.0,
+        "min": 0.75
+      },
+      "stat": "weapon_damage"
+    }
+  ]
+}
