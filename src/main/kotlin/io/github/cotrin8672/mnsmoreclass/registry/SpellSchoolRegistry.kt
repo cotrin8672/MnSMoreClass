@@ -12,6 +12,7 @@ object SpellSchoolRegistry : IMnsRegistry<SpellSchool> by MnsRegistryDelegate() 
             .add(SpellRegistry.PURIFICATION, PointData(3, 1))
             .add(SpellRegistry.WEAKNESS_AURA, PointData(5, 3))
             .add(SpellRegistry.ENTANGLING_THORNS, PointData(4, 6))
+            .add(SpellRegistry.SAKURA_BLOOM, PointData(5, 4))
             .build()
             .add()
 

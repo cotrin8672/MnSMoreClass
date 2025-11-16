@@ -43,6 +43,13 @@ object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate
                     .capScaling(0.75f)
                     .build()
 
+    val SakuraBloomHeal: ValueCalculation =
+            ValueCalcBuilderKt.of(SpellRegistry.SAKURA_BLOOM)
+                    .baseValue(6f, 36f)
+                    .spellScaling(0.2f, 0.6f)
+                    .capScaling(0.25f)
+                    .build()
+
     fun register() {
         ValueCalcBuilderKt.of(SpellRegistry.BARKSKIN)
                 .spellScaling(1f, 2f)
@@ -61,5 +68,6 @@ object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate
         ShadowSecret.add()
         WeaknessAura.add()
         EntanglingThornsDot.add()
+        SakuraBloomHeal.add()
     }
 }

@@ -167,6 +167,27 @@ object ExileEffectRegistry : IMnsRegistry<ExileEffect> by MnsRegistryDelegate() 
             .addTags(EffectTags.negative, EffectTags.immobilizing)
             .build()
             .add()
+
+        ExileEffectBuilderKt.of(
+            EffectCtx(
+                SpellRegistry.SAKURA_BLOOM,
+                "sakura_bloom",
+                Elements.Nature,
+                EffectType.beneficial
+            )
+        )
+            .vanillaStat(
+                VanillaStatData.create(
+                    Attributes.ATTACK_SPEED,
+                    0.15f,
+                    ModType.MORE,
+                    SAKURA_BLOOM_ATTACK_SPEED_UUID
+                )
+            )
+            .maxStacks(1)
+            .addTags(EffectTags.positive, EffectTags.offensive)
+            .build()
+            .add()
     }
 
     private val SHUNJIN_ATTACK_SPEED_UUID: UUID =
@@ -177,4 +198,6 @@ object ExileEffectRegistry : IMnsRegistry<ExileEffect> by MnsRegistryDelegate() 
         UUID.fromString("893c46ab-7bda-43dd-81ec-d0f71aafdbb2")
     private val ENTANGLING_THORNS_KNOCKBACK_RESIST_UUID: UUID =
         UUID.fromString("0e58c71a-aee5-4d0f-94ba-98a183f6c465")
+    private val SAKURA_BLOOM_ATTACK_SPEED_UUID: UUID =
+        UUID.fromString("f0a612fe-1c02-4c9c-ac6b-6f6a41cc0f5b")
 }

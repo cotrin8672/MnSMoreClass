@@ -24,6 +24,7 @@ object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
     const val PURIFICATION = "purification"
     const val WEAKNESS_AURA = "weakness_aura"
     const val ENTANGLING_THORNS = "entangling_thorns"
+    const val SAKURA_BLOOM = "sakura_bloom"
 
     fun register() {
         SpellBuilder.of(
@@ -147,6 +148,55 @@ object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
                     .tick(20.0)
             )
             .animations(SpellAnimations.HAND_UP_CAST, SpellAnimations.CAST_FINISH)
+            .buildForEffect()
+            .add()
+
+        SpellBuilder.of(
+            SAKURA_BLOOM,
+            PlayStyle.INT,
+            SpellConfiguration.Builder.instant(25, 20 * 60)
+                .setChargesAndRegen(SAKURA_BLOOM, 0, 0),
+            "Sakura Bloom",
+            listOf(
+                SpellTags.heal,
+                SpellTags.BUFF,
+                SpellTags.area,
+            ),
+        )
+            .weaponReq(CastingWeapon.MAGE_WEAPON)
+            .manualDesc(
+                "Call forth a sakura grove that heals nearby allies every second and grants Sakura Blessing."
+            )
+            .onCast(PartBuilder.playSound(SoundEvents.CHERRY_SAPLING_PLACE, 1.5, 1.0))
+            .onCast(
+                PartBuilder.justAction(
+                    SpellAction.SUMMON_AT_SIGHT.create(
+                        SlashEntities.SIMPLE_PROJECTILE.get(),
+                        20.0 * 20,
+                        3.0
+                    ).apply {
+                        put(MapField.ENTITY_NAME, "sakura_grove")
+                        put(MapField.RADIUS, 8.0)
+                    }
+                )
+            )
+            .onTick(
+                "sakura_grove",
+                PartBuilder.cloudParticles(
+                    ParticleTypes.CHERRY_LEAVES,
+                    30.0,
+                    8.0,
+                    2.0
+                ).tick(1.0)
+            )
+            .onTick(
+                "sakura_grove",
+                PartBuilder.healInAoe(ValueCalcRegistry.SakuraBloomHeal, 8.0).tick(20.0)
+            )
+            .onTick(
+                "sakura_grove",
+                PartBuilder.giveExileEffectToAlliesInRadius(8.0, "sakura_bloom", 60.0).tick(20.0)
+            )
             .buildForEffect()
             .add()
 
