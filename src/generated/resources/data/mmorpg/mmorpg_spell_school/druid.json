@@ -17,6 +17,10 @@
     "purification": {
       "x": 3,
       "y": 1
+    },
+    "weakness_aura": {
+      "x": 5,
+      "y": 3
     }
   }
 }

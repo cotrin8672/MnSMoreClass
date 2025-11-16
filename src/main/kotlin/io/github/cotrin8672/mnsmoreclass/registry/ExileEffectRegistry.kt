@@ -7,6 +7,7 @@ import com.robertx22.mine_and_slash.aoe_data.database.stats.base.EffectCtx
 import com.robertx22.mine_and_slash.database.data.exile_effects.EffectType
 import com.robertx22.mine_and_slash.database.data.exile_effects.ExileEffect
 import com.robertx22.mine_and_slash.database.data.exile_effects.VanillaStatData
+import com.robertx22.mine_and_slash.database.data.stats.types.defense.Armor
 import com.robertx22.mine_and_slash.database.data.stats.types.defense.DodgeRating
 import com.robertx22.mine_and_slash.database.data.stats.types.resources.health.HealthRegen
 import com.robertx22.mine_and_slash.tags.all.EffectTags
@@ -73,6 +74,14 @@ object ExileEffectRegistry : IMnsRegistry<ExileEffect> by MnsRegistryDelegate() 
             .stat(600f, 600f, SpellChangeStats.COOLDOWN_TICKS.get(), ModType.FLAT)
             .maxStacks(1)
             .addTags(EffectTags.positive, EffectTags.offensive)
+            .build()
+            .add()
+
+        ExileEffectBuilderKt
+            .of(EffectCtx("weakness_aura", "weakness_aura", Elements.Nature, EffectType.negative))
+            .stat(-30f, -30f, Armor.getInstance(), ModType.MORE)
+            .maxStacks(1)
+            .addTags(EffectTags.negative, EffectTags.offensive)
             .build()
             .add()
     }

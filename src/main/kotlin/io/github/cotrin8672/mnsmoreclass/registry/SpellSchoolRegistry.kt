@@ -10,6 +10,7 @@ object SpellSchoolRegistry : IMnsRegistry<SpellSchool> by MnsRegistryDelegate() 
         SchoolBuilderKt.of("druid", "Druid")
             .add(SpellRegistry.BARKSKIN, PointData(1, 0))
             .add(SpellRegistry.PURIFICATION, PointData(3, 1))
+            .add(SpellRegistry.WEAKNESS_AURA, PointData(5, 3))
             .build()
             .add()
 

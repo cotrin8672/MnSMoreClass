@@ -1,5 +1,6 @@
 package io.github.cotrin8672.mnsmoreclass.registry
 
+import com.robertx22.mine_and_slash.a_libraries.player_animations.SpellAnimations
 import com.robertx22.mine_and_slash.aoe_data.database.spells.PartBuilder
 import com.robertx22.mine_and_slash.aoe_data.database.spells.SpellBuilder
 import com.robertx22.mine_and_slash.database.data.spells.components.Spell
@@ -15,6 +16,7 @@ import net.minecraft.sounds.SoundEvents
 object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
         const val BARKSKIN = "barkskin"
         const val PURIFICATION = "purification"
+        const val WEAKNESS_AURA = "weakness_aura"
 
         fun register() {
                 SpellBuilder.of(
@@ -57,6 +59,24 @@ object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
                                         0.0
                                 )
                         )
+                        .buildForEffect()
+                        .add()
+
+                SpellBuilder.of(
+                                WEAKNESS_AURA,
+                                PlayStyle.INT,
+                                SpellConfiguration.Builder.instant(15, 20 * 35),
+                                "Weakness Aura",
+                                listOf(SpellTags.magic, SpellTags.area, SpellTags.curse, SpellTags.LIGHTNING),
+                        )
+                        .weaponReq(CastingWeapon.MAGE_WEAPON)
+                        .manualDesc(
+                                "Project a weakening aura, inflicting enemies in front with -30% Armor for 8 seconds."
+                        )
+                        .onCast(PartBuilder.playSound(SoundEvents.SLIME_ATTACK, 1.0, 0.7))
+                        .onCast(PartBuilder.groundEdgeParticles(ParticleTypes.SPORE_BLOSSOM_AIR, 100.0, 4.0, 1.0))
+                        .onCast(PartBuilder.addExileEffectToEnemiesInFront(WEAKNESS_AURA, 7.0, 4.0, 160.0))
+                        .animations(SpellAnimations.HAND_UP_CAST, SpellAnimations.CAST_FINISH)
                         .buildForEffect()
                         .add()
 

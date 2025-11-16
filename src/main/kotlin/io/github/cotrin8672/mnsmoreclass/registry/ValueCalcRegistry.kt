@@ -2,6 +2,7 @@ package io.github.cotrin8672.mnsmoreclass.registry
 
 import com.robertx22.mine_and_slash.database.data.value_calc.ValueCalculation
 import io.github.cotrin8672.mnsmoreclass.content.ninja.NinjaSpells
+import io.github.cotrin8672.mnsmoreclass.registry.SpellRegistry
 import io.github.cotrin8672.mnsmoreclass.value_calc.ValueCalcBuilderKt
 
 object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate() {
@@ -39,6 +40,10 @@ object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate
             .attackScaling(0.0f, 0.0f)
             .build()
 
+    val WeaknessAura: ValueCalculation =
+        ValueCalcBuilderKt.of(SpellRegistry.WEAKNESS_AURA)
+            .build()
+
     fun register() {
         ValueCalcBuilderKt.of(SpellRegistry.BARKSKIN)
             .spellScaling(1f, 2f)
@@ -57,5 +62,6 @@ object ValueCalcRegistry : IMnsRegistry<ValueCalculation> by MnsRegistryDelegate
         RyuuseiRanbu.add()
         SwingScythe.add()
         ShadowSecret.add()
+        WeaknessAura.add()
     }
 }
