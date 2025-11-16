@@ -14,6 +14,10 @@
       "x": 1,
       "y": 0
     },
+    "entangling_thorns": {
+      "x": 4,
+      "y": 6
+    },
     "purification": {
       "x": 3,
       "y": 1
