@@ -146,7 +146,7 @@ publisher {
 
     curseID.set("1386060")
     modrinthID.set("DBGdxjVe")
-    versionType.set("alpha")
+    versionType.set("release")
     changelog.set(file("changelog.md"))
     version.set(project.version.toString())
     displayName.set("$modName $modVersion")
