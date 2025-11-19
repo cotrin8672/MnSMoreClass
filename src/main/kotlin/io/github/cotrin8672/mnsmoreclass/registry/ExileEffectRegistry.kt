@@ -188,6 +188,20 @@ object ExileEffectRegistry : IMnsRegistry<ExileEffect> by MnsRegistryDelegate() 
             .addTags(EffectTags.positive, EffectTags.offensive)
             .build()
             .add()
+
+        ExileEffectBuilderKt.of(
+            EffectCtx(
+                "undying_blessing",
+                "undying_blessing",
+                Elements.Physical,
+                EffectType.beneficial
+            )
+        )
+            .maxStacks(3)
+            .desc("Negates one lethal hit and restores health to 50%.")
+            .addTags(EffectTags.positive, EffectTags.defensive)
+            .build()
+            .add()
     }
 
     private val SHUNJIN_ATTACK_SPEED_UUID: UUID =

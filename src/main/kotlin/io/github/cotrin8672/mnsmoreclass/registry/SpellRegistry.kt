@@ -25,6 +25,7 @@ object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
     const val WEAKNESS_AURA = "weakness_aura"
     const val ENTANGLING_THORNS = "entangling_thorns"
     const val SAKURA_BLOOM = "sakura_bloom"
+    const val UNDYING_BLESSING = "undying_blessing"
 
     fun register() {
         SpellBuilder.of(
@@ -196,6 +197,28 @@ object SpellRegistry : IMnsRegistry<Spell> by MnsRegistryDelegate() {
             .onTick(
                 "sakura_grove",
                 PartBuilder.giveExileEffectToAlliesInRadius(8.0, "sakura_bloom", 60.0).tick(20.0)
+            )
+            .buildForEffect()
+            .add()
+
+        SpellBuilder.of(
+            UNDYING_BLESSING,
+            PlayStyle.INT,
+            SpellConfiguration.Builder.instant(35, 20 * 60 * 3),
+            "Undying Blessing",
+            listOf(
+                SpellTags.BUFF,
+                SpellTags.area,
+            ),
+        )
+            .weaponReq(CastingWeapon.MAGE_WEAPON)
+            .manualDesc(
+                "Grant nearby allies one stack of Undying Blessing, guarding them from the next fatal blow."
+            )
+            .onCast(PartBuilder.playSound(SoundEvents.BEACON_ACTIVATE, 1.0, 1.0))
+            .onCast(PartBuilder.aoeParticles(ParticleTypes.TOTEM_OF_UNDYING, 120.0, 8.0))
+            .onCast(
+                PartBuilder.giveExileEffectToAlliesInRadius(8.0, "undying_blessing", 20.0 * 300)
             )
             .buildForEffect()
             .add()

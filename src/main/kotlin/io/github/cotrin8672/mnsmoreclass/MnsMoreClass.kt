@@ -1,8 +1,10 @@
 package io.github.cotrin8672.mnsmoreclass
 
 import com.robertx22.mine_and_slash.mmorpg.SlashRef
-import io.github.cotrin8672.mnsmoreclass.datagen.MnsDataProvider
+import io.github.cotrin8672.mnsmoreclass.datagen.MnsGsonDataProvider
+import io.github.cotrin8672.mnsmoreclass.datagen.MnsSerializableDataProvider
 import io.github.cotrin8672.mnsmoreclass.events.ToxicEdgeHandler
+import io.github.cotrin8672.mnsmoreclass.events.UndyingBlessingHandler
 import io.github.cotrin8672.mnsmoreclass.init.ModIdentity
 import io.github.cotrin8672.mnsmoreclass.registrate.KotlinRegistrate
 import io.github.cotrin8672.mnsmoreclass.registry.*
@@ -42,6 +44,7 @@ object MnsMoreClass {
         ItemRegistry.register()
 
         MinecraftForge.EVENT_BUS.register(ToxicEdgeHandler)
+        MinecraftForge.EVENT_BUS.register(UndyingBlessingHandler)
     }
 
     @SubscribeEvent
@@ -52,6 +55,7 @@ object MnsMoreClass {
             PerkRegistry.register()
             ValueCalcRegistry.register()
             ExileEffectRegistry.register()
+            StatRegistry.register()
         }
     }
 
@@ -65,31 +69,32 @@ object MnsMoreClass {
         PerkRegistry.register()
         ValueCalcRegistry.register()
         ExileEffectRegistry.register()
+        StatRegistry.register()
 
         event.generator.addProvider(
             event.includeServer(),
-            MnsDataProvider(output, SpellSchoolRegistry.getAll(), "mmorpg_spell_school") { school ->
+            MnsGsonDataProvider(output, SpellSchoolRegistry.getAll(), "mmorpg_spell_school") { school ->
                 ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, school.id)
             }
         )
 
         event.generator.addProvider(
             event.includeServer(),
-            MnsDataProvider(output, SpellRegistry.getAll(), "mmorpg_spells") { spell ->
+            MnsGsonDataProvider(output, SpellRegistry.getAll(), "mmorpg_spells") { spell ->
                 ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, spell.identifier)
             }
         )
 
         event.generator.addProvider(
             event.includeServer(),
-            MnsDataProvider(output, PerkRegistry.getAll(), "mmorpg_perk") { perk ->
+            MnsGsonDataProvider(output, PerkRegistry.getAll(), "mmorpg_perk") { perk ->
                 ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, perk.id)
             }
         )
 
         event.generator.addProvider(
             event.includeServer(),
-            MnsDataProvider(output, ValueCalcRegistry.getAll(), "mmorpg_value_calc") {
+            MnsGsonDataProvider(output, ValueCalcRegistry.getAll(), "mmorpg_value_calc") {
                     valueCalc,
                 ->
                 ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, valueCalc.id)
@@ -98,8 +103,15 @@ object MnsMoreClass {
 
         event.generator.addProvider(
             event.includeServer(),
-            MnsDataProvider(output, ExileEffectRegistry.getAll(), "mmorpg_exile_effect") { exileEffect ->
+            MnsGsonDataProvider(output, ExileEffectRegistry.getAll(), "mmorpg_exile_effect") { exileEffect ->
                 ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, exileEffect.id)
+            }
+        )
+
+        event.generator.addProvider(
+            event.includeServer(),
+            MnsSerializableDataProvider(output, StatRegistry.getAll(), "mmorpg_stat") { stat ->
+                ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, stat.GUID())
             }
         )
     }
