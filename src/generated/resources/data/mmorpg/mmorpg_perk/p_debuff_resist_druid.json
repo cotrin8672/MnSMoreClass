@@ -1,0 +1,15 @@
+{
+  "type": "STAT",
+  "icon": "mmorpg:textures/gui/spells/passives/p_debuff_resist_druid.png",
+  "id": "p_debuff_resist_druid",
+  "is_entry": false,
+  "max_lvls": 8,
+  "stats": [
+    {
+      "type": "FLAT",
+      "scale_to_lvl": false,
+      "stat": "dmg_received",
+      "v1": -4.0
+    }
+  ]
+}

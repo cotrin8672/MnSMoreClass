@@ -1,0 +1,15 @@
+{
+  "type": "STAT",
+  "icon": "mmorpg:textures/gui/spells/passives/p_heal_str_druid.png",
+  "id": "p_heal_str_druid",
+  "is_entry": false,
+  "max_lvls": 8,
+  "stats": [
+    {
+      "type": "FLAT",
+      "scale_to_lvl": false,
+      "stat": "increase_healing",
+      "v1": 3.0
+    }
+  ]
+}

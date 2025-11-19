@@ -1,0 +1,15 @@
+{
+  "type": "STAT",
+  "icon": "mmorpg:textures/gui/spells/passives/p_move_speed_ninja.png",
+  "id": "p_move_speed_ninja",
+  "is_entry": false,
+  "max_lvls": 8,
+  "stats": [
+    {
+      "type": "MORE",
+      "scale_to_lvl": false,
+      "stat": "move_speed",
+      "v1": 2.0
+    }
+  ]
+}

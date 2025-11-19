@@ -1,0 +1,15 @@
+{
+  "type": "STAT",
+  "icon": "mmorpg:textures/gui/spells/passives/p_physical_resist_ninja.png",
+  "id": "p_physical_resist_ninja",
+  "is_entry": false,
+  "max_lvls": 8,
+  "stats": [
+    {
+      "type": "PERCENT",
+      "scale_to_lvl": false,
+      "stat": "dmg_received",
+      "v1": -3.0
+    }
+  ]
+}
