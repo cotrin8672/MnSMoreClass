@@ -1,528 +1,168 @@
-# Mine and Slash Perkシステム（パッシブスキル）
+# Mine and Slash SpellSchool パッシブ Perk ガイド
 
-**最終更新**: 2025年11月10日
-**対象バージョン**: 1.20 Forge
-
----
-
-## 目次
-
-1. [Perk概要](#perk概要)
-2. [PerkBuilder](#perkbuilder)
-3. [Perk種類](#perk種類)
-4. [OptScaleExactStat](#optscaleexactstat)
-5. [実装パターン](#実装パターン)
-6. [アイコン管理](#アイコン管理)
+**最終更新**: 2025年11月18日  
+**対象バージョン**: Mine and Slash Rework 1.20 (Forge)
 
 ---
 
-## Perk概要
+## 1. このドキュメントの目的
 
-**Perk**はMine and Slashのパッシブスキルシステム。スペルツリーに配置される。
-
-### Perkの役割
-
-- **パッシブ効果**: Stat増加、特殊効果
-- **スペル習得**: スペルをアンロック
-- **ゲームチェンジャー**: 大きなゲームプレイ変更
-
-### PerkType
-
-```java
-Perk.PerkType.STAT    // 通常のStat Perk
-Perk.PerkType.MAJOR   // Major Perk（大型）
-```
+- 本稿は **SpellSchool に紐づくパッシブ Perk**（スペルツリー内で取得するポイント）を対象とする。
+- Talent ツリー（`TalentTree` 系、別ポイントプール）は [07_PassiveSkillSystem.md](./07_PassiveSkillSystem.md) を参照。
+- 情報源は Mine and Slash 本体ソースの該当クラスを確認し、仕様を整合させている。
 
 ---
 
-## PerkBuilder
+## 2. 用語整理
 
-### 基本メソッド
-
-#### 1. `PerkBuilder.spell()` - スペル習得Perk
-
-```kotlin
-PerkBuilder.spell(spellId: String): Perk
-```
-
-**用途**: スペルをアンロック
-
-**例**:
-```kotlin
-PerkBuilder.spell("fireball")
-// → "fireball"スペルを習得するPerk
-```
-
-**特徴**:
-- スペルのアイコンを自動使用
-- `max_lvls`はスペルの最大レベルと同じ
-- `LearnSpellStat`が自動付与
+| 用語 | 説明 |
+| ---- | ---- |
+| Perk | パッシブ効果やスペル習得を表すデータエントリ |
+| SpellSchool | アセンションクラスごとのツリー。Perk が座標と紐づく |
+| SpellSchoolsData | プレイヤーが SpellSchool Perk に投資したレベルを保持するクラス |
+| PointType | `SPELL` / `PASSIVE`。消費ポイント種別とリセット処理を決定 |
 
 ---
 
-#### 2. `PerkBuilder.passive()` - パッシブPerk
+## 3. データフロー概要
 
-```kotlin
-PerkBuilder.passive(
-    id: String,
-    maxLvl: Int,
-    stats: OptScaleExactStat...
-): Perk
+```
+PerkBuilder → Perk 登録 → SpellSchool 配置 → SpellSchoolsData (プレイヤー状態)
 ```
 
-**用途**: Statを増加させるパッシブ
-
-**例**:
-```kotlin
-PerkBuilder.passive(
-    "p_health_druid",
-    8,  // 最大8レベル
-    OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT)  // +4%/Lv
-)
-// → 最大8レベル、1レベルごとに体力+4%
-```
-
-**アイコンパス**: `textures/gui/spells/passives/{id}.png`
+1. `PerkBuilder` で Perk を生成・登録。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/perks/PerkBuilder.java#30-167
+2. 生成した ID を `SchoolBuilder.add(id, PointData)` で SpellSchool の座標へ割り当て。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/spell_schools/SchoolBuilder.java#21-34
+3. プレイヤーは `SpellSchoolsData` に投資レベルが保存され、`StatContext` に変換される。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#23-185
 
 ---
 
-#### 3. `PerkBuilder.ascPoint()` - アセンションポイント
+## 4. Perk データモデル
 
-```kotlin
-PerkBuilder.ascPoint(
-    id: String,
-    stats: OptScaleExactStat...
-): Perk
-```
+`Perk` クラスの主要フィールド。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/perks/Perk.java#32-156
 
-**用途**: アセンションクラス専用のポイント
+- `type` : 表示や枠線に利用する `PerkType`
+- `id` : 一意識別子
+- `icon` : GUI 用アイコンパス
+- `max_lvls` : SpellSchool で投資できる最大レベル
+- `stats` : `OptScaleExactStat` のリスト（効果本体）
+- `is_entry` : ツリー開始ノードかどうか
+- `one_kind` : 同系統排他タグ（同じタグを持つ Perk を同時取得不可）
 
-**例**:
-```kotlin
-PerkBuilder.ascPoint(
-    "druid_point",
-    OptScaleExactStat(1, Stats.ASCENSION_POINT)
-)
-```
+### 4.1 SpellSchool における PerkType
 
-**アイコンパス**: `textures/gui/asc_classes/perk/{id}.png`
+| PerkType | SpellSchool での役割 | 備考 |
+| -------- | ------------------- | ---- |
+| `STAT` | 通常パッシブ／スペル習得 | 白枠表示 |
+| `SPECIAL` | Big Stat／ソケット等 | 紫枠。大型表示 |
+| `MAJOR` | 大型パッシブ（トレードオフなど） | 赤枠。`locname` を個別設定 |
+| `ASC` | アセンション専用 Perk | Ascendancy ポイントを消費 |
 
----
-
-#### 4. `PerkBuilder.stat()` - Stat Perk
-
-```kotlin
-PerkBuilder.stat(
-    id: String,
-    stats: OptScaleExactStat...
-): Perk
-```
-
-**用途**: シンプルなStat増加
-
-**例**:
-```kotlin
-PerkBuilder.stat(
-    "str_boost",
-    OptScaleExactStat(5, Stats.STRENGTH, ModType.FLAT)
-)
-```
-
-**アイコン**: 最初のStatのアイコンを自動使用
+`Perk#getPointType()` が `SPELL` か `PASSIVE` を返し、SpellSchool UI のポイント消費ロジックで利用される。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/perks/Perk.java#48-70
 
 ---
 
-#### 5. `PerkBuilder.gameChanger()` - ゲームチェンジャー
+## 5. PerkBuilder の実用パターン
 
-```kotlin
-PerkBuilder.gameChanger(
-    id: String,
-    locname: String,
-    stats: OptScaleExactStat...
-): Perk
-```
+| メソッド | 主用途 | 自動設定される内容 |
+| -------- | ------ | ------------------ |
+| `spell(id)` | スペル習得ノード | `LearnSpellStat`, スペル最大レベル, スペルアイコン |
+| `passive(id, maxLvl, stats...)` | 複数レベルのパッシブ | `PerkType.STAT`, `textures/gui/spells/passives/{id}.png` |
+| `stat(id, stats...)` | 単発ステータス強化 | 最初の Stat アイコンを流用 |
+| `bigStat(id, locname, stats...)` | SPECIAL 枠の大型強化 | `PerkType.SPECIAL` と表示名を設定 |
+| `gameChanger(id, locname, stats...)` | MAJOR 枠 | `PerkType.MAJOR`, 専用アイコン |
+| `socket()` | Jewel ソケット | JewelSocketStat を自動付与 |
+| `ascPoint(id, stats...)` | Ascendancy 用ノード | `textures/gui/asc_classes/perk/{id}.png` |
 
-**用途**: 大型パッシブ、ゲームプレイを変える
-
-**例**:
-```kotlin
-PerkBuilder.gameChanger(
-    "berserker",
-    "Berserker",
-    OptScaleExactStat(30, Stats.DAMAGE, ModType.MORE),
-    OptScaleExactStat(-20, Armor.getInstance(), ModType.MORE)
-)
-```
-
-**アイコンパス**: `textures/gui/stat_icons/game_changers/{id}.png`
+複数 Stat を渡した場合は順に `stats` リストへ追加され、後段のツールチップ整列処理へ渡る。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/perks/PerkBuilder.java#46-147
 
 ---
 
-#### 6. `PerkBuilder.bigStat()` - 大型Stat Perk
+## 6. OptScaleExactStat の扱い
 
-```kotlin
-PerkBuilder.bigStat(
-    id: String,
-    locname: String,
-    stats: OptScaleExactStat...
-): Perk
-```
-
-**用途**: 通常より大きな値のStat Perk
-
-**例**:
-```kotlin
-PerkBuilder.bigStat(
-    "major_str",
-    "Major Strength",
-    OptScaleExactStat(10, Stats.STRENGTH, ModType.FLAT)
-)
-```
-
-**アイコン**: 最初のStatのアイコンを自動使用
-
-**特徴**: `PerkType.SPECIAL`
+- 1 レベルあたりのスタット変化を表現。`value`・`stat`・`ModType` を指定する。
+- SpellSchool ではプレイヤーレベル依存の指数スケールは基本的に使用せず、`SpellSchoolsData` 側でレベル差分のパーセンテージを加算している。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#170-184
+- スペル習得 Perk も `OptScaleExactStat(1, LearnSpellStat(spell))` として定義される。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/perks/PerkBuilder.java#30-44
 
 ---
 
-#### 7. `PerkBuilder.socket()` - ジュエルソケット
+## 7. SpellSchool への配置とレベル要求
+
+`SpellSchool` は Perk ID と `PointData`（x,y）をマップに保持し、y 座標に応じてレベル要求を決定する。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spell_school/SpellSchool.java#30-53
+
+### 7.1 レベル要求ロジック
+
+- `lvl_reqs` デフォルト: `[1, 5, 10, 15, 20, 25, 30]`
+- スペルランクアップ時は `GameBalanceConfig.player_points[PointType.SPELLS].points_per_lvl` による追加要求を計算。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spell_school/SpellSchool.java#45-52
+
+### 7.2 SchoolBuilder の利用
 
 ```kotlin
-PerkBuilder.socket(): Perk
+SchoolBuilder.of("druid", "Druid")
+    .add("p_health_druid", PointData(1, 1))
+    .add("barkskin", PointData(2, 1))
+    .build()
 ```
 
-**用途**: ジュエルを装着できるソケットを追加
-
-**例**:
-```kotlin
-PerkBuilder.socket()  // パラメータ不要
-```
-
-**自動設定**:
-- ID: `"jewel_socket"`
-- Stat: JewelSocketStat +1
-- アイコン: JewelSocketStatのアイコン
+`MAX_X_ROWS` / `MAX_Y_ROWS` の範囲チェックが行われ、同一座標の重複も弾かれる。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/spell_schools/SchoolBuilder.java#21-27
 
 ---
 
-## OptScaleExactStat
+## 8. プレイヤーデータとポイント管理
 
-Perkで付与するStatを定義。
+`SpellSchoolsData` が取得状況を管理し、ポイント消費／リセット／ステータス適用を担当。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#23-185
 
-### コンストラクタ
+### 8.1 学習チェック
 
-```kotlin
-OptScaleExactStat(
-    value: Number,      // 値（1レベルあたり）
-    stat: Stat,         // 対象Stat
-    modType: ModType    // FLAT/PERCENT/MORE
-)
-```
+- ポイント残数、キャラクターレベル、SpellSchool のレベル要求、最大ランクを判定。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#115-136
+- Spell と Passive でポイントプールが分かれる (`PlayerPointsType.SPELLS` / `PASSIVES`)。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#80-113
 
-### ModType
+### 8.2 ステータス適用
 
-```java
-ModType.FLAT       // 固定値 (+10)
-ModType.PERCENT    // パーセント (+10%)
-ModType.MORE       // 乗算 (×1.1)
-```
+- 投資レベル数に応じて `percentIncrease = (投資レベル-1) * 100` を設定し、`increaseByAddedPercent()` で累積倍率を更新。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#170-184
+- Spell Perk の場合は `LearnSpellStat` 経由で `SpellCastingData` にリンクし、ツールチップで習得ランクを表示する。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/perks/Perk.java#147-155
 
-### 例
+### 8.3 リセット
 
-```kotlin
-// 体力 +4%/レベル
-OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT)
-
-// ダメージ +3固定/レベル
-OptScaleExactStat(3, Stats.DAMAGE, ModType.FLAT)
-
-// 防御力 +5% MORE/レベル
-OptScaleExactStat(5, Armor.getInstance(), ModType.MORE)
-```
-
-### スケーリング
-
-Perkのレベルに応じて値が増加：
-
-```kotlin
-// 最大8レベル、1レベルあたり+4%
-PerkBuilder.passive("p_health", 8, OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT))
-
-// レベル1: +4%
-// レベル2: +8%
-// ...
-// レベル8: +32%
-```
+- `canUnlearn` はレベルやリセットポイントを確認し、可能な場合に 1 レベル減算。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#138-168
+- リセット後は不要なエントリを `removeUnlearnedPerks()` で除去。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#41-77
 
 ---
 
-## 実装パターン
+## 9. 実装フロー（SpellSchool 向けパッシブ追加）
 
-### パターン1: スペル習得Perk
-
-```kotlin
-// Barkskinスペルを習得
-PerkBuilder.spell("barkskin")
-```
-
-**自動設定**:
-- ID: `"barkskin"`
-- アイコン: スペルのアイコン
-- 最大レベル: スペルの最大レベル
-- Stat: `LearnSpellStat(barkskin)`
+1. **Stat / StatEffect 準備**: 既存 Stat を利用するか、特殊挙動が必要なら追加実装。
+2. **Perk を生成**: `PerkBuilder.passive` 等で効果と最大レベルを設定し登録。
+3. **SpellSchool へ配置**: `SchoolBuilder.add` で座標割り当て。y 座標でレベル要求を調整。
+4. **アセット配置**: `textures/gui/spells/passives/{perk_id}.png`（32×32 推奨）を追加。
+5. **ローカライズ**: `mmorpg.talent.{perk_id}`（`Perk#locNameGroup = Talents`）で名前を登録。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/perks/Perk.java#171-183
+6. **検証**: Dev Tools ログで未登録エラーがないか確認し、ゲーム内でポイント消費・リセット挙動をテスト。
 
 ---
 
-### パターン2: 単一Statパッシブ
+## 10. アイコンとローカライズ
 
-```kotlin
-// 体力 +4%/Lv、最大8レベル
-PerkBuilder.passive(
-    "p_health_druid",
-    8,
-    OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT)
-)
-```
+- **アイコン**
+  - パッシブ: `SlashRef.MODID/textures/gui/spells/passives/{id}.png`
+  - スペル: 対象スペルのアイコンを使用
+  - MAJOR: `textures/gui/stat_icons/game_changers/{id}.png`
+- **推奨解像度**: 32×32 px
+- **表示名**: `mmorpg.talent.{id}` キーに追加（英語/日本語双方）。
 
 ---
 
-### パターン3: 複数Statパッシブ
+## 11. デバッグ Tips
 
-```kotlin
-// 雷ダメージ+3% と DoTダメージ+2%
-PerkBuilder.passive(
-    "p_nature_damage",
-    8,
-    OptScaleExactStat(3, new ElementalDamage(Elements.Lightning), ModType.PERCENT),
-    OptScaleExactStat(2, Stats.DOT_DAMAGE, ModType.PERCENT)
-)
-```
+- 表示されない: SpellSchool の `perks` に ID が登録されているか確認。
+- レベル条件を満たしているのに取得不可: `SpellSchool.isLevelEnoughForSpellLevelUp` が現在ランクと追加要求を計算しているため、プレイヤーレベル不足がないか確認。@Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spell_school/SpellSchool.java#41-52
+- 効果が反映されない: `OptScaleExactStat` の `stat` が ExileDB に登録済みか、ModType の整合性を再確認。
 
 ---
 
-### パターン4: ゲームチェンジャー
+## 12. 参考リファレンス
 
-```kotlin
-// ダメージ+30%、防御-20%のトレードオフ
-PerkBuilder.gameChanger(
-    "glass_cannon",
-    "Glass Cannon",
-    OptScaleExactStat(30, Stats.DAMAGE, ModType.MORE),
-    OptScaleExactStat(-20, Armor.getInstance(), ModType.MORE)
-)
-```
-
----
-
-### パターン5: 複雑なパッシブ（Kotlin）
-
-```kotlin
-object DruidPassives {
-    fun register() {
-        // 体力ブースト
-        PerkBuilder.passive(
-            "p_health_druid",
-            8,
-            OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT)
-        ).add()
-
-        // マナリジェネ
-        PerkBuilder.passive(
-            "p_mana_regen_druid",
-            8,
-            OptScaleExactStat(5, Stats.MANA_REGEN, ModType.PERCENT)
-        ).add()
-
-        // 自然ダメージ
-        PerkBuilder.passive(
-            "p_nature_damage",
-            8,
-            OptScaleExactStat(3, ElementalDamage(Elements.Lightning), ModType.PERCENT)
-        ).add()
-    }
-}
-
-// 拡張関数
-fun Perk.add() {
-    PerkRegistry.add(this)
-    ExileDB.Perks().addSerializable(this.id, this)
-}
-```
-
----
-
-## アイコン管理
-
-### アイコンパス
-
-Perkの種類によってアイコンパスが異なる：
-
-| Perk種類 | パス |
-|---------|------|
-| `spell()` | スペルのアイコンを自動使用 |
-| `passive()` | `textures/gui/spells/passives/{id}.png` |
-| `ascPoint()` | `textures/gui/asc_classes/perk/{id}.png` |
-| `stat()` | Statのアイコンを自動使用 |
-| `gameChanger()` | `textures/gui/stat_icons/game_changers/{id}.png` |
-
-### アイコン作成
-
-```
-src/main/resources/assets/mmorpg/textures/gui/spells/passives/
-├── p_health_druid.png       (32x32)
-├── p_mana_regen_druid.png   (32x32)
-└── p_nature_damage.png      (32x32)
-```
-
-**推奨サイズ**: 32x32ピクセル
-
----
-
-## 翻訳
-
-### 翻訳キー
-
-```json
-{
-  "mmorpg.perk.<perk_id>": "Perk Name"
-}
-```
-
-### 例
-
-**en_us.json**:
-```json
-{
-  "mmorpg.perk.p_health_druid": "Health Boost",
-  "mmorpg.perk.p_mana_regen_druid": "Mana Regeneration"
-}
-```
-
-**ja_jp.json**:
-```json
-{
-  "mmorpg.perk.p_health_druid": "体力ブースト",
-  "mmorpg.perk.p_mana_regen_druid": "マナリジェネレーション"
-}
-```
-
----
-
-## Kotlinでの実装例
-
-### PerkRegistry
-
-```kotlin
-object PerkRegistry : IMnsRegistry<Perk> by MnsRegistryDelegate() {
-    const val P_HEALTH_DRUID = "p_health_druid"
-    const val P_MANA_REGEN_DRUID = "p_mana_regen_druid"
-
-    fun register() {
-        // パッシブ登録
-        PerkBuilder.passive(
-            P_HEALTH_DRUID,
-            8,
-            OptScaleExactStat(4, Stats.MAX_HEALTH, ModType.PERCENT)
-        ).add()
-
-        PerkBuilder.passive(
-            P_MANA_REGEN_DRUID,
-            8,
-            OptScaleExactStat(5, Stats.MANA_REGEN, ModType.PERCENT)
-        ).add()
-
-        // スペル習得Perk
-        PerkBuilder.spell("barkskin").add()
-        PerkBuilder.spell("purification").add()
-    }
-}
-
-// 拡張関数
-fun Perk.add() {
-    PerkRegistry.add(this)
-    ExileDB.Perks().addSerializable(this.id, this)
-}
-```
-
-### データ生成
-
-```kotlin
-@SubscribeEvent
-fun gatherData(event: GatherDataEvent) {
-    PerkRegistry.register()
-
-    event.generator.addProvider(
-        event.includeServer(),
-        MnsDataProvider(output, PerkRegistry.getAll(), "mmorpg_perk") { perk ->
-            ResourceLocation.fromNamespaceAndPath(SlashRef.MODID, perk.id)
-        }
-    )
-}
-```
-
----
-
-## よくある組み合わせ
-
-### ダメージ特化
-
-```kotlin
-PerkBuilder.passive("p_damage", 10,
-    OptScaleExactStat(3, Stats.DAMAGE, ModType.PERCENT)
-)
-```
-
-### 防御特化
-
-```kotlin
-PerkBuilder.passive("p_armor", 8,
-    OptScaleExactStat(3, Armor.getInstance(), ModType.PERCENT),
-    OptScaleExactStat(2, new PhysicalResist(), ModType.FLAT)
-)
-```
-
-### 属性ダメージ
-
-```kotlin
-PerkBuilder.passive("p_fire_damage", 10,
-    OptScaleExactStat(4, ElementalDamage(Elements.Fire), ModType.PERCENT)
-)
-```
-
-### リソース回復
-
-```kotlin
-PerkBuilder.passive("p_resource_regen", 8,
-    OptScaleExactStat(5, Stats.MANA_REGEN, ModType.PERCENT),
-    OptScaleExactStat(5, Stats.HEALTH_REGEN, ModType.PERCENT)
-)
-```
-
----
-
-## トラブルシューティング
-
-### ❌ Perkが表示されない
-
-**原因**: SpellSchoolに追加していない
-
-**解決**: SchoolBuilderで配置を指定
-
-### ❌ アイコンが表示されない
-
-**原因**: パスが間違っている
-
-**解決**: `textures/gui/spells/passives/{id}.png`を確認
-
-### ❌ Statが効かない
-
-**原因**: ModTypeが間違っている
-
-**解決**: FLAT/PERCENT/MOREを確認
-
----
-
-## 次のドキュメント
-
-- [06_SpellSchool.md](./06_SpellSchool.md) - SpellSchool（クラス）システム
-- [02_SpellSystem.md](./02_SpellSystem.md) - スペルシステム
+- `Perk`: @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/perks/Perk.java#32-275
+- `PerkBuilder`: @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/perks/PerkBuilder.java#17-167
+- `SpellSchool`: @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/database/data/spell_school/SpellSchool.java#21-98
+- `SchoolBuilder`: @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/aoe_data/database/spell_schools/SchoolBuilder.java#8-34
+- `SpellSchoolsData`: @Mine-And-Slash-Rework/src/main/java/com/robertx22/mine_and_slash/saveclasses/spells/SpellSchoolsData.java#23-188
+- 併読推奨: [06_SpellSchool.md](./06_SpellSchool.md), [07_PassiveSkillSystem.md](./07_PassiveSkillSystem.md)

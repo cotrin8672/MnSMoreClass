@@ -54,7 +54,7 @@ EffectType.neutral    // どちらでもない
 
 | フィールド | 役割 |
 | --- | --- |
-| `ticks_left` | 残り Tick。`is_infinite == true` の場合は無視され UI では \u221E 表示 |
+| `ticks_left` | 残り Tick。`is_infinite == true` の場合は無視され UI では ∞ 表示 |
 | `stacks` | 現在のスタック数。0 未満で `shouldRemove()` |
 | `str_multi` | 効果強度の倍率（パークやタレントから加算） |
 | `self_cast` | 自己付与かどうか。スペルの再割り当て確認に利用 |
