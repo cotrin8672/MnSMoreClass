@@ -10,33 +10,65 @@
     30
   ],
   "perks": {
-    "ryuusei_ranbu": {
-      "x": 5,
+    "p_attack_speed_ninja": {
+      "x": 8,
+      "y": 0
+    },
+    "p_crit_rate_ninja": {
+      "x": 8,
       "y": 2
     },
+    "p_dodge_rating_ninja": {
+      "x": 9,
+      "y": 2
+    },
+    "p_health_ninja": {
+      "x": 9,
+      "y": 0
+    },
+    "p_move_speed_ninja": {
+      "x": 9,
+      "y": 6
+    },
+    "p_physical_resist_ninja": {
+      "x": 8,
+      "y": 6
+    },
+    "p_skill_haste_ninja": {
+      "x": 8,
+      "y": 4
+    },
+    "p_weapon_damage_ninja": {
+      "x": 9,
+      "y": 4
+    },
+    "ryuusei_ranbu": {
+      "x": 6,
+      "y": 3
+    },
     "shadow_secret": {
-      "x": 5,
+      "x": 6,
       "y": 6
     },
     "shadow_walk": {
-      "x": 1,
-      "y": 0
+      "x": 0,
+      "y": 1
     },
     "shunjin": {
-      "x": 3,
-      "y": 1
+      "x": 2,
+      "y": 2
     },
     "shuriken": {
-      "x": 2,
-      "y": 0
-    },
-    "swing_scythe": {
-      "x": 4,
+      "x": 1,
       "y": 1
     },
+    "swing_scythe": {
+      "x": 5,
+      "y": 2
+    },
     "toxic_edge": {
-      "x": 4,
-      "y": 3
+      "x": 5,
+      "y": 4
     }
   }
 }

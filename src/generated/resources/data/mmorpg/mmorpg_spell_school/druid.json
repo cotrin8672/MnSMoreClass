@@ -11,24 +11,60 @@
   ],
   "perks": {
     "barkskin": {
-      "x": 1,
-      "y": 0
+      "x": 3,
+      "y": 2
     },
     "entangling_thorns": {
       "x": 4,
       "y": 6
     },
-    "purification": {
-      "x": 3,
+    "p_area_druid": {
+      "x": 9,
+      "y": 2
+    },
+    "p_armor_druid": {
+      "x": 9,
+      "y": 6
+    },
+    "p_debuff_resist_druid": {
+      "x": 8,
+      "y": 6
+    },
+    "p_dot_dmg_druid": {
+      "x": 8,
+      "y": 5
+    },
+    "p_effect_dur_druid": {
+      "x": 8,
+      "y": 3
+    },
+    "p_heal_str_druid": {
+      "x": 9,
+      "y": 4
+    },
+    "p_health_druid": {
+      "x": 8,
       "y": 1
+    },
+    "p_mana_regen_druid": {
+      "x": 8,
+      "y": 2
+    },
+    "purification": {
+      "x": 5,
+      "y": 2
     },
     "sakura_bloom": {
       "x": 5,
-      "y": 4
+      "y": 6
+    },
+    "undying_blessing": {
+      "x": 3,
+      "y": 6
     },
     "weakness_aura": {
       "x": 5,
-      "y": 3
+      "y": 4
     }
   }
 }
