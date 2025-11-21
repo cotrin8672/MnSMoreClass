@@ -151,13 +151,13 @@ publisher {
     version.set(project.version.toString())
     displayName.set("$modName $modVersion")
     setGameVersions(mcVersion)
-    setLoaders(ModLoader.FORGE)
+    setLoaders(ModLoader.FORGE, ModLoader.NEOFORGE)
     setCurseEnvironment(CurseEnvironment.BOTH)
     artifact.set("build/libs/${base.archivesName.get()}-${project.version}.jar")
 
     curseDepends {
         required("kotlin-for-forge")
-        required("mine-and-slash")
+        required("mine-and-slash-reloaded")
     }
     modrinthDepends {
         required("kotlin-for-forge")

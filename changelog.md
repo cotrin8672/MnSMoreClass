@@ -1,10 +1,10 @@
 - # Changelog
 -
 - ## [1.0.0] - 2025-11-20
-- ### 追加
+- ### Addition
 -
-    - 初期リリース。
+    - Initial release.
 -
-    - ドルイドとニンジャのアセンションクラスを実装し、各クラス固有のスペルスクール・パーク・エフェクトを追加。
+    - Implemented the Druid and Ninja Ascension classes and added unique spell school perk effects for each class.
 -
-    - 英語・日本語のローカライズを収録。
+    - Includes English and Japanese localizations.
